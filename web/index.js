@@ -104,6 +104,7 @@ function init() {
   document.getElementById(botName).style.width = '180px';
   document.getElementById(botName).style.backgroundColor = '#253045';
   document.body.style.marginRight = '180px';
+  renderUI(user);
 }
 
 /**
