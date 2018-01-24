@@ -24,11 +24,13 @@ const config = require('../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../package.json').name;
 const roomId = bdk.getRoomId();
-const _user = {
+const ZER0 = 0;
+const currentUser = {
   name: bdk.getUserName(),
-  id: bdk.getUserName(),
+  id: bdk.getUserId(),
   email: bdk.getUserEmail(),
 };
+let roles;
 
 /**
  * When a refocus.events is dispatch it is handled here.
@@ -37,6 +39,17 @@ const _user = {
  */
 function handleEvents(event) {
   console.log(botName + ' Event Activity', event);
+  if ((event.detail.context) &&
+    (event.detail.context.type === 'User')) {
+    const userChange = {};
+    userChange[event.detail.context.user.id] = {
+      name: event.detail.context.user.name,
+      id: event.detail.context.user.id,
+      email: event.detail.context.user.email,
+      isActive: event.detail.context.isActive,
+    };
+    renderUI(userChange, roles);
+  }
 }
 
 /**
@@ -73,21 +86,22 @@ function handleActions(action) {
 function confirmExit(){
   const eventType = {
     'type': 'User',
-    'user': _user,
-    'join': false,
+    'user': currentUser,
+    'isActive': false,
   };
   bdk.createEvents(
     roomId,
-    _user.name + ' has left the room at ' +
+    currentUser.name + ' has left the room at ' +
       moment().format('YYYY-MM-DD HH:mm Z'),
     eventType
   );
 }
 
 /**
- * The actions to take before load.
+ * To make participants sticky on the right hand side we edit the
+ * document layout here.
  */
-function init() {
+function createSidebar(){
   const participatElement =
     document.getElementById(botName)
       .parentElement.parentElement.parentElement;
@@ -101,24 +115,54 @@ function init() {
   document.getElementById(botName).style.overflowX = 'hidden';
   document.getElementById(botName).style.right = 0;
   document.getElementById(botName).style.top = 0;
-  document.getElementById(botName).style.width = '180px';
+  document.getElementById(botName).style.width = '195px';
   document.getElementById(botName).style.backgroundColor = '#253045';
-  document.body.style.marginRight = '180px';
-  renderUI(user);
+  document.body.style.marginRight = '198px';
+}
+
+/**
+ * The actions to take before load.
+ */
+function init() {
+  createSidebar();
+  bdk.createEvents(
+    roomId,
+    currentUser.name + ' has joined the room at ' +
+      moment().format('YYYY-MM-DD HH:mm Z'),
+    {
+      'type': 'User',
+      'user': currentUser,
+      'isActive': true,
+    }
+  )
+    .then(() => {
+      return bdk.findRoom(roomId);
+    })
+    .then((res) => {
+      roles = (res.body.settings &&
+        (res.body.settings.participantsRoles !== undefined)) ?
+        res.body.settings.participantsRoles :
+        [];
+      console.log('roles',roles)
+      return bdk.getActiveUsers(roomId);
+    })
+    .then((users) => {
+      renderUI(users, roles);
+    });
 }
 
 /**
  * This is the main function to render the UI
  *
  * {Integer} roomId - Room Id that is provided from refocus
- * {Object} _users - The current user on page
- * @param {Event} response - Refocus events that are happening in this room
+ * @param {Object} _users - The current user on page
  */
-function renderUI(_users){
+function renderUI(_users, _roles){
   ReactDOM.render(
     <App
       roomId={ roomId }
       users={ _users }
+      roles={ _roles }
     />,
     document.getElementById(botName)
   );
