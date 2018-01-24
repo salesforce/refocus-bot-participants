@@ -63,6 +63,11 @@
   "metadata": {
     "actions": [],
     "data": [],
-    "settings": []
+    "settings": [
+      {
+        "key": "participantsRoles",
+        "helpText": "This is an array of objects of roles that you may want to assign in a room. Each object contains a name, label, order."
+      }
+    ]
   }
 }
