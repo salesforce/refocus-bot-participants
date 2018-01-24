@@ -24,13 +24,14 @@ const config = require('../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../package.json').name;
 const roomId = bdk.getRoomId();
-const ZER0 = 0;
+const ZERO = 0;
 const currentUser = {
   name: bdk.getUserName(),
   id: bdk.getUserId(),
   email: bdk.getUserEmail(),
 };
-let roles;
+let roles = [];
+const currentRole = {};
 
 /**
  * When a refocus.events is dispatch it is handled here.
@@ -48,7 +49,7 @@ function handleEvents(event) {
       email: event.detail.context.user.email,
       isActive: event.detail.context.isActive,
     };
-    renderUI(userChange, roles);
+    renderUI(userChange, roles, currentRole);
   }
 }
 
@@ -68,6 +69,7 @@ function handleSettings(room) {
  */
 function handleData(data) {
   console.log(botName + ' Bot Data Activity', data);
+  currentRole[data.detail.name] = data.detail.value;
 }
 
 /**
@@ -143,11 +145,18 @@ function init() {
         (res.body.settings.participantsRoles !== undefined)) ?
         res.body.settings.participantsRoles :
         [];
-      console.log('roles',roles)
+      return bdk.getBotData(roomId);
+    })
+    .then((data) => {
+      roles.forEach((role) => {
+        currentRole[role.label] = data.body
+          .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
+      });
+
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
-      renderUI(users, roles);
+      renderUI(users, roles, currentRole);
     });
 }
 
@@ -157,12 +166,13 @@ function init() {
  * {Integer} roomId - Room Id that is provided from refocus
  * @param {Object} _users - The current user on page
  */
-function renderUI(_users, _roles){
+function renderUI(_users, _roles, _currentRole){
   ReactDOM.render(
     <App
       roomId={ roomId }
       users={ _users }
       roles={ _roles }
+      currentRole={ _currentRole }
     />,
     document.getElementById(botName)
   );
