@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
+import moment from 'moment';
 const React=require('react');
 const _ = require('lodash');
 const env = process.env.NODE_ENV || 'dev';
@@ -16,6 +17,7 @@ class App extends React.Component{
       users: this.props.users,
       roles: this.props.roles,
       currentRole: this.props.currentRole,
+      currentUser: this.props.currentUser,
       value: {},
     };
 
@@ -24,27 +26,63 @@ class App extends React.Component{
   }
 
   componentWillReceiveProps(nextProps) {
-    const newUsers = _.extend(this.state.users, nextProps.users);
-    this.setState({ users: newUsers });
+    if (nextProps.users !== null) {
+      const newUsers = _.extend(this.state.users, nextProps.users);
+      this.setState({ users: newUsers });
+    }
     this.setState({ roles: nextProps.roles });
     this.setState({ currentRole: nextProps.currentRole });
+    const currentValues = this.state.value;
+    Object.keys(nextProps.currentRole).forEach((role) => {
+      if (nextProps.currentRole[role] !== undefined) {
+        currentValues[role] = JSON.parse(nextProps.currentRole[role].value);
+      }
+    });
+    this.setState({ value: currentValues });
   }
 
   handleSelectChange (values) {
+    const { roomId, currentUser } = this.state;
     const newValue = this.state.value;
     newValue[values.role] = values;
     this.setState({ value: newValue });
     const currentRole = this.state.currentRole;
+    const eventType = {
+      'type': 'Event',
+      'newUser': values,
+    };
     if (currentRole[values.role]) {
       bdk.changeBotData(currentRole[values.role].id,
-        JSON.stringify(values));
+        JSON.stringify(values))
+        .then((o) => {
+          if (o.status.ok) {
+            bdk.createEvents(
+              roomId,
+              currentUser.name + ' has changed ' + values.role +
+              ' to ' + values.label + ' at ' +
+              moment().format('YYYY-MM-DD HH:mm Z'),
+              eventType
+            );
+          }
+        });
     } else {
       bdk.createBotData(
         this.props.roomId,
         botName,
         'participants' + values.role,
         JSON.stringify(values)
-      );
+      )
+        .then((o) => {
+          if (o.status.ok) {
+            bdk.createEvents(
+              roomId,
+              currentUser.name + ' has added ' + values.label +
+              ' to ' + values.role + ' at ' +
+              moment().format('YYYY-MM-DD HH:mm Z'),
+              eventType
+            );
+          }
+        });
     }
   }
 
@@ -71,14 +109,15 @@ class App extends React.Component{
               role: role.label,
             });
             if (!value[role.label]) {
-              value[role.label] = JSON.parse(currentRole[role.label].value);
+              value[role.label] = currentRole[role.label] === undefined ? '' :
+                JSON.parse(currentRole[role.label].value);
             }
           });
           return (
             <div className="slds-m-around_small" key={role.label}>
               <div
                 className="slds-text-body_small slds-m-bottom_xx-small"
-                style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
+                style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                 {role.name}
               </div>
               <Select
@@ -94,14 +133,20 @@ class App extends React.Component{
         <div className={divider}></div>
         {Object.keys(users).map((id) => {
           const usernameCSS =
-            'slds-m-horizontal_small ' +
+            'slds-m-horizontal_x-small ' +
             'slds-m-bottom_x-small ' +
             'slds-text-color_inverse';
+          const hats = JSON.stringify(value).indexOf(id);
           if (users[id].isActive) {
             return (
               <div
                 className={usernameCSS}
                 key={id}>
+                <span style={{ float: 'left', width: '20px', display: 'inline-block' }}>
+                  {hats > 0 ?
+                    '\u{1F3A9}':
+                    '\u00A0'}
+                </span>
                 {users[id].name}
               </div>
             );
@@ -119,6 +164,7 @@ App.propTypes={
   users: PropTypes.object,
   roles: PropTypes.array,
   currentRole: PropTypes.object,
+  currentUser: PropTypes.object,
 };
 
 module.exports=App;

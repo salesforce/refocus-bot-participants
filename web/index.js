@@ -49,7 +49,7 @@ function handleEvents(event) {
       email: event.detail.context.user.email,
       isActive: event.detail.context.isActive,
     };
-    renderUI(userChange, roles, currentRole);
+    renderUI(userChange, roles, currentRole, currentUser);
   }
 }
 
@@ -69,7 +69,13 @@ function handleSettings(room) {
  */
 function handleData(data) {
   console.log(botName + ' Bot Data Activity', data);
-  currentRole[data.detail.name] = data.detail.value;
+  const label = data.detail.name.replace('participants', '');
+  if (!currentRole[label]) {
+    currentRole[label] = {};
+    currentRole[label].id = data.detail.id;
+  }
+  currentRole[label].value = data.detail.value;
+  renderUI(null, roles, currentRole, currentUser);
 }
 
 /**
@@ -156,7 +162,7 @@ function init() {
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
-      renderUI(users, roles, currentRole);
+      renderUI(users, roles, currentRole, currentUser);
     });
 }
 
@@ -166,13 +172,14 @@ function init() {
  * {Integer} roomId - Room Id that is provided from refocus
  * @param {Object} _users - The current user on page
  */
-function renderUI(_users, _roles, _currentRole){
+function renderUI(_users, _roles, _currentRole, _currentUser){
   ReactDOM.render(
     <App
       roomId={ roomId }
       users={ _users }
       roles={ _roles }
       currentRole={ _currentRole }
+      currentUser={ _currentUser }
     />,
     document.getElementById(botName)
   );
