@@ -141,8 +141,13 @@ class App extends React.Component{
             return (
               <div
                 className={usernameCSS}
+                style={{ wordBreak: 'break-all' }}
                 key={id}>
-                <span style={{ float: 'left', width: '20px', display: 'inline-block' }}>
+                <span style={{
+                  float: 'left',
+                  width: '20px',
+                  display: 'inline-block'
+                }}>
                   {hats > 0 ?
                     '\u{1F3A9}':
                     '\u00A0'}
