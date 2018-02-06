@@ -55,7 +55,7 @@ class App extends React.Component{
       bdk.changeBotData(currentRole[values.role].id,
         JSON.stringify(values))
         .then((o) => {
-          if (o.status.ok) {
+          if (o.ok) {
             bdk.createEvents(
               roomId,
               currentUser.name + ' has changed ' + values.role +
@@ -73,7 +73,7 @@ class App extends React.Component{
         JSON.stringify(values)
       )
         .then((o) => {
-          if (o.status.ok) {
+          if (o.ok) {
             bdk.createEvents(
               roomId,
               currentUser.name + ' has added ' + values.label +
