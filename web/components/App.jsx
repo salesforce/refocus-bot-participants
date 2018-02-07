@@ -55,7 +55,7 @@ class App extends React.Component{
       bdk.changeBotData(currentRole[values.role].id,
         JSON.stringify(values))
         .then((o) => {
-          if (o.status.ok) {
+          if (o.ok) {
             bdk.createEvents(
               roomId,
               currentUser.name + ' has changed ' + values.role +
@@ -73,7 +73,7 @@ class App extends React.Component{
         JSON.stringify(values)
       )
         .then((o) => {
-          if (o.status.ok) {
+          if (o.ok) {
             bdk.createEvents(
               roomId,
               currentUser.name + ' has added ' + values.label +
@@ -141,8 +141,13 @@ class App extends React.Component{
             return (
               <div
                 className={usernameCSS}
+                style={{ wordBreak: 'break-all' }}
                 key={id}>
-                <span style={{ float: 'left', width: '20px', display: 'inline-block' }}>
+                <span style={{
+                  float: 'left',
+                  width: '20px',
+                  display: 'inline-block'
+                }}>
                   {hats > 0 ?
                     '\u{1F3A9}':
                     '\u00A0'}
