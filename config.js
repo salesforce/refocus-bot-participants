@@ -1,9 +1,14 @@
+/* eslint no-process-env: 0 */
 /**
  * config.js
  * Config file for different deployments - dev, staging, production
  */
 
+const DEFAULT_PORT = 5000;
+
 module.exports = {
+  env: process.env.NODE_ENV || 'dev',
+  port: process.env.PORT || DEFAULT_PORT,
   dev: {
     refocusUrl: 'http://localhost:3000',
     token: process.env.API_TOKEN,

@@ -30,7 +30,6 @@ Note: If you want to test this locally you will need some environment variables:
 * participantsRoles - Array containing the roles you want to assign users too.
 
 ### Example Room Settings
-
 ```javascript
 "settings": {
 	"participantsRoles": [
@@ -47,3 +46,15 @@ Note: If you want to test this locally you will need some environment variables:
 	]
 }
 ```
+
+## Contributing
+If you have any ideas on how this project could be improved, please feel free. The steps involved are:
+* Fork the repo on GitHub.
+* Clone this project to your machine.
+* Commit changes to your own branch.
+* Push your work back up to your fork.
+* Submit a Pull Request so we can review it!
+
+## Release History
+Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-versioning#semver-for-publishers)
+* 1.0.0 Readme and iFrame friendly
