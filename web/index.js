@@ -19,7 +19,7 @@ const React = require('react');
 const ReactDOM = require('react-dom');
 const moment = require('moment');
 const App = require('./components/App.jsx');
-const env = process.env.NODE_ENV || 'dev';
+const env = require('../config.js').env;
 const config = require('../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../package.json').name;
@@ -34,22 +34,46 @@ let roles = [];
 const currentRole = {};
 
 /**
+ * This is the main function to render the UI
+ *
+ * {Integer} roomId - Room Id that is provided from refocus
+ * @param {Object} _users - All users
+ * @param {Array} _roles - All the roles
+ * @param {Object} _currentRole - The current role of user
+ * @param {Object} _currentUser - The current user on page
+ */
+function renderUI(_users, _roles, _currentRole, _currentUser){
+  ReactDOM.render(
+    <App
+      roomId={ roomId }
+      users={ _users }
+      roles={ _roles }
+      currentRole={ _currentRole }
+      currentUser={ _currentUser }
+    />,
+    document.getElementById(botName)
+  );
+}
+
+/**
  * When a refocus.events is dispatch it is handled here.
  *
  * @param {Event} event - The most recent event object
  */
 function handleEvents(event) {
-  console.log(botName + ' Event Activity', event);
-  if ((event.detail.context) &&
-    (event.detail.context.type === 'User')) {
-    const userChange = {};
-    userChange[event.detail.context.user.id] = {
-      name: event.detail.context.user.name,
-      id: event.detail.context.user.id,
-      email: event.detail.context.user.email,
-      isActive: event.detail.context.isActive,
-    };
-    renderUI(userChange, roles, currentRole, currentUser);
+  if (event.detail.roomId === roomId) {
+    bdk.log.debug('Event received: ', event);
+    if ((event.detail.context) &&
+      (event.detail.context.type === 'User')) {
+      const userChange = {};
+      userChange[event.detail.context.user.id] = {
+        name: event.detail.context.user.name,
+        id: event.detail.context.user.id,
+        email: event.detail.context.user.email,
+        isActive: event.detail.context.isActive,
+      };
+      renderUI(userChange, roles, currentRole, currentUser);
+    }
   }
 }
 
@@ -59,7 +83,7 @@ function handleEvents(event) {
  * @param {Room} room - Room object that was dispatched
  */
 function handleSettings(room) {
-  console.log(botName + ' Room Activity', room);
+  bdk.log.debug('Settings Change Event received: ', room);
 }
 
 /**
@@ -68,14 +92,16 @@ function handleSettings(room) {
  * @param {BotData} data - Bot Data object that was dispatched
  */
 function handleData(data) {
-  console.log(botName + ' Bot Data Activity', data);
-  const label = data.detail.name.replace('participants', '');
-  if (!currentRole[label]) {
-    currentRole[label] = {};
-    currentRole[label].id = data.detail.id;
+  if (data.detail.roomId === roomId) {
+    bdk.log.debug('Bot Data Event Received: ', data.detail);
+    const label = data.detail.name.replace('participants', '');
+    if (!currentRole[label]) {
+      currentRole[label] = {};
+      currentRole[label].id = data.detail.id;
+    }
+    currentRole[label].value = data.detail.value;
+    renderUI(null, roles, currentRole, currentUser);
   }
-  currentRole[label].value = data.detail.value;
-  renderUI(null, roles, currentRole, currentUser);
 }
 
 /**
@@ -84,7 +110,9 @@ function handleData(data) {
  * @param {BotAction} action - Bot Action object that was dispatched
  */
 function handleActions(action) {
-  console.log(botName + ' Bot Action Activity', action);
+  if (action.detail.roomId === roomId) {
+    bdk.log.debug('Action Received: ', action.detail);
+  }
 }
 
 /**
@@ -106,33 +134,9 @@ function confirmExit(){
 }
 
 /**
- * To make participants sticky on the right hand side we edit the
- * document layout here.
- */
-function createSidebar(){
-  const participatElement =
-    document.getElementById(botName)
-      .parentElement.parentElement.parentElement;
-  document.body.appendChild(
-    document.getElementById(botName)
-  );
-  participatElement.remove();
-  document.getElementById(botName).style.position = 'fixed';
-  document.getElementById(botName).style.zIndex = 100;
-  document.getElementById(botName).style.height = '100%';
-  document.getElementById(botName).style.overflowX = 'hidden';
-  document.getElementById(botName).style.right = 0;
-  document.getElementById(botName).style.top = 0;
-  document.getElementById(botName).style.width = '195px';
-  document.getElementById(botName).style.backgroundColor = '#253045';
-  document.body.style.marginRight = '198px';
-}
-
-/**
  * The actions to take before load.
  */
 function init() {
-  createSidebar();
   bdk.createEvents(
     roomId,
     currentUser.name + ' has joined the room at ' +
@@ -164,25 +168,6 @@ function init() {
     .then((users) => {
       renderUI(users, roles, currentRole, currentUser);
     });
-}
-
-/**
- * This is the main function to render the UI
- *
- * {Integer} roomId - Room Id that is provided from refocus
- * @param {Object} _users - The current user on page
- */
-function renderUI(_users, _roles, _currentRole, _currentUser){
-  ReactDOM.render(
-    <App
-      roomId={ roomId }
-      users={ _users }
-      roles={ _roles }
-      currentRole={ _currentRole }
-      currentUser={ _currentUser }
-    />,
-    document.getElementById(botName)
-  );
 }
 
 window.onbeforeunload = confirmExit;

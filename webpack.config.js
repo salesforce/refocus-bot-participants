@@ -1,15 +1,16 @@
 const path = require('path');
-// creates index.html folder and puts it in dist folder
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const Dotenv = require('dotenv-webpack');
 const ZipPlugin = require('zip-webpack-plugin');
-const env = process.env.NODE_ENV || 'dev';
+const Dotenv = require('dotenv-webpack');
+const env = require('./config.js').env;
 const url = require('./config.js')[env].refocusUrl;
 const botName = require('./package.json').name;
 
 const config = {
+
   entry: './web/index.js',
+
   output: {
     path: path.resolve(__dirname, './web/dist'),
     filename: 'index_bundle.js',
@@ -20,22 +21,22 @@ const config = {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        include: [path.resolve(__dirname, 'lib'), path.resolve(__dirname, 'web')],
+        include: [path.resolve(__dirname, 'lib'),
+          path.resolve(__dirname, 'web')],
         use: 'babel-loader?compact=true',
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ['style-loader', 'css-loader'],
       },
       {
         test: /\.handlebars$/,
-        loader: "handlebars-loader",
+        loader: 'handlebars-loader',
         include: path.resolve(__dirname, 'web'),
       },
       {
         test: /.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-        use: "url-loader?limit=100000",
-        include: path.resolve(__dirname, 'web'),
+        use: 'url-loader?limit=100000',
       },
     ]
   },
@@ -67,7 +68,7 @@ const config = {
   ]
 };
 
-if(process.env.NODE_ENV === 'production'){
+if (env === 'production') {
   config.plugins.push(
     new webpack.optimize.UglifyJsPlugin()
   );
