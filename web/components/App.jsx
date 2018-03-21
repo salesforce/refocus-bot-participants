@@ -4,10 +4,11 @@ import 'react-select/dist/react-select.css';
 import moment from 'moment';
 const React=require('react');
 const _ = require('lodash');
-const env = process.env.NODE_ENV || 'dev';
+const env = require('../../config.js').env;
 const config = require('../../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../../package.json').name;
+const MIN_HATS = 0;
 
 class App extends React.Component{
   constructor(props){
@@ -114,10 +115,10 @@ class App extends React.Component{
             }
           });
           return (
-            <div className="slds-m-around_small" key={role.label}>
+            <div className="slds-m-horizontal_small slds-m-bottom_small"
+              key={role.label}>
               <div
-                className="slds-text-body_small slds-m-bottom_xx-small"
-                style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
+                className="slds-text-body_small slds-m-bottom_xx-small">
                 {role.name}
               </div>
               <Select
@@ -134,8 +135,7 @@ class App extends React.Component{
         {Object.keys(users).map((id) => {
           const usernameCSS =
             'slds-m-horizontal_x-small ' +
-            'slds-m-bottom_x-small ' +
-            'slds-text-color_inverse';
+            'slds-m-bottom_x-small';
           const hats = JSON.stringify(value).indexOf(id);
           if (users[id].isActive) {
             return (
@@ -148,7 +148,7 @@ class App extends React.Component{
                   width: '20px',
                   display: 'inline-block'
                 }}>
-                  {hats > 0 ?
+                  {hats > MIN_HATS ?
                     '\u{1F3A9}':
                     '\u00A0'}
                 </span>
