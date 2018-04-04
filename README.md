@@ -59,3 +59,4 @@ If you have any ideas on how this project could be improved, please feel free. T
 Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-versioning#semver-for-publishers)
 * 1.0.0 Readme and iFrame friendly
 * 1.0.1 Removed public folder to reduce size
+* 1.1.0 Included fullName functionality
