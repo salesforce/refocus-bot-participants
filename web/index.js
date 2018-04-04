@@ -27,6 +27,7 @@ const currentUser = {
   name: bdk.getUserName(),
   id: bdk.getUserId(),
   email: bdk.getUserEmail(),
+  fullName: bdk.getUserFullName(),
 };
 let roles = [];
 const currentRole = {};

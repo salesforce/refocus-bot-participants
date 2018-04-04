@@ -152,7 +152,7 @@ class App extends React.Component{
                     '\u{1F3A9}':
                     '\u00A0'}
                 </span>
-                {users[id].name}
+                {users[id].fullName ? users[id].fullName : users[id].name}
               </div>
             );
           }
