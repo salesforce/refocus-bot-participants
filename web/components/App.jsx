@@ -105,7 +105,7 @@ class App extends React.Component{
           const options = [];
           Object.keys(users).forEach((id) => {
             options.push({
-              label: users[id].name,
+              label: users[id].fullName ? users[id].fullName : users[id].name,
               value: users[id].id,
               role: role.label,
             });
