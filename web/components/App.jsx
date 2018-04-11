@@ -105,7 +105,8 @@ class App extends React.Component{
           const options = [];
           Object.keys(users).forEach((id) => {
             options.push({
-              label: users[id].name,
+              label: users[id].fullName ? users[id].fullName : users[id].name,
+              email: users[id].name,
               value: users[id].id,
               role: role.label,
             });
@@ -152,7 +153,7 @@ class App extends React.Component{
                     '\u{1F3A9}':
                     '\u00A0'}
                 </span>
-                {users[id].name}
+                {users[id].fullName ? users[id].fullName : users[id].name}
               </div>
             );
           }
