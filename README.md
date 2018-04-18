@@ -60,3 +60,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.0.0 Readme and iFrame friendly
 * 1.0.1 Removed public folder to reduce size
 * 1.1.0 Included fullName functionality
+* 1.1.1 Fixed fullName bug
