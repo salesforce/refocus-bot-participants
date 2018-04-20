@@ -70,6 +70,7 @@ function handleEvents(event) {
         id: event.detail.context.user.id,
         email: event.detail.context.user.email,
         isActive: event.detail.context.isActive,
+        fullName: event.detail.context.user.fullName,
       };
       renderUI(userChange, roles, currentRole, currentUser);
     }
