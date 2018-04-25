@@ -44,7 +44,7 @@ class App extends React.Component{
 
   handleSelectChange (role) {
     return (inputValue) => {
-      const values = inputValue || { role: role.label };
+      const values = inputValue || null;
       const { roomId, currentUser } = this.state;
       const newValue = this.state.value;
       newValue[role.label] = values;
@@ -54,15 +54,15 @@ class App extends React.Component{
         'type': 'Event',
         'newUser': values,
       };
-      if (currentRole[values.role]) {
-        bdk.changeBotData(currentRole[values.role].id,
+      if (currentRole[role.label]) {
+        bdk.changeBotData(currentRole[role.label].id,
           JSON.stringify(values))
           .then((o) => {
             if (o.ok) {
               bdk.createEvents(
                 roomId,
                 currentUser.fullName ? currentUser.fullName : currentUser.name +
-                ' has changed ' + values.role +
+                ' has changed ' + role.label +
                 ' to ' + values.label + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
@@ -73,7 +73,7 @@ class App extends React.Component{
         bdk.createBotData(
           this.props.roomId,
           botName,
-          'participants' + values.role,
+          'participants' + role.label,
           JSON.stringify(values)
         )
           .then((o) => {
@@ -82,7 +82,7 @@ class App extends React.Component{
                 roomId,
                 currentUser.fullName ? currentUser.fullName : currentUser.name +
                 ' has added ' + values.label +
-                ' to ' + values.role + ' at ' +
+                ' to ' + role.label + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
               );
