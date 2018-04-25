@@ -61,7 +61,8 @@ class App extends React.Component{
             if (o.ok) {
               bdk.createEvents(
                 roomId,
-                currentUser.name + ' has changed ' + values.role +
+                currentUser.fullName ? currentUser.fullName : currentUser.name +
+                ' has changed ' + values.role +
                 ' to ' + values.label + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
@@ -79,7 +80,8 @@ class App extends React.Component{
             if (o.ok) {
               bdk.createEvents(
                 roomId,
-                currentUser.name + ' has added ' + values.label +
+                currentUser.fullName ? currentUser.fullName : currentUser.name +
+                ' has added ' + values.label +
                 ' to ' + values.role + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
