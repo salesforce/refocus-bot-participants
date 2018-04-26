@@ -44,7 +44,10 @@ class App extends React.Component{
 
   handleSelectChange (role) {
     return (inputValue) => {
-      const values = inputValue || null;
+      let values = inputValue || null;
+      if ((values) && (values.role === undefined)) {
+        values.label = values.value;
+      }
       const { roomId, currentUser } = this.state;
       const newValue = this.state.value;
       newValue[role.label] = values;
@@ -54,6 +57,8 @@ class App extends React.Component{
         'type': 'Event',
         'newUser': values,
       };
+      values = values ? values : '';
+      const outputValue = values.label ? values.label : '';
       if (currentRole[role.label]) {
         bdk.changeBotData(currentRole[role.label].id,
           JSON.stringify(values))
@@ -63,7 +68,7 @@ class App extends React.Component{
                 roomId,
                 currentUser.fullName ? currentUser.fullName : currentUser.name +
                 ' has changed ' + role.label +
-                ' to ' + values.label + ' at ' +
+                ' to ' + outputValue + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
               );
@@ -81,7 +86,7 @@ class App extends React.Component{
               bdk.createEvents(
                 roomId,
                 currentUser.fullName ? currentUser.fullName : currentUser.name +
-                ' has added ' + values.label +
+                ' has added ' + outputValue +
                 ' to ' + role.label + ' at ' +
                 moment().format('YYYY-MM-DD HH:mm Z'),
                 eventType
@@ -95,6 +100,12 @@ class App extends React.Component{
   toggleRtl (e) {
     const rtl = e.target.checked;
     this.setState({ rtl });
+  }
+
+  renderPrompt (role) {
+    return (inputValue) => {
+      return `Add '${inputValue}' to ${role.label}`;
+    };
   }
 
   render() {
@@ -127,12 +138,19 @@ class App extends React.Component{
                 className="slds-text-body_small slds-m-bottom_xx-small">
                 {role.name}
               </div>
-              <Select
+              <Select.Creatable
                 onChange={this.handleSelectChange(role)}
                 options={options}
                 placeholder={ 'Choose ' + role.label }
                 rtl={this.state.rtl}
                 value={value[role.label]}
+                promptTextCreator={this.renderPrompt(role)}
+                newOptionCreator={(newOption) => {
+                  return {
+                    label: newOption.label,
+                    value: newOption.label + ' (External)'
+                  };
+                }}
                 clearable={true}
               />
             </div>
