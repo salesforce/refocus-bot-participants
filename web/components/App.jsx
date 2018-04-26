@@ -42,49 +42,54 @@ class App extends React.Component{
     this.setState({ value: currentValues });
   }
 
-  handleSelectChange (values) {
-    const { roomId, currentUser } = this.state;
-    const newValue = this.state.value;
-    newValue[values.role] = values;
-    this.setState({ value: newValue });
-    const currentRole = this.state.currentRole;
-    const eventType = {
-      'type': 'Event',
-      'newUser': values,
+  handleSelectChange (role) {
+    return (inputValue) => {
+      const values = inputValue || null;
+      const { roomId, currentUser } = this.state;
+      const newValue = this.state.value;
+      newValue[role.label] = values;
+      this.setState({ value: newValue });
+      const currentRole = this.state.currentRole;
+      const eventType = {
+        'type': 'Event',
+        'newUser': values,
+      };
+      if (currentRole[role.label]) {
+        bdk.changeBotData(currentRole[role.label].id,
+          JSON.stringify(values))
+          .then((o) => {
+            if (o.ok) {
+              bdk.createEvents(
+                roomId,
+                currentUser.fullName ? currentUser.fullName : currentUser.name +
+                ' has changed ' + role.label +
+                ' to ' + values.label + ' at ' +
+                moment().format('YYYY-MM-DD HH:mm Z'),
+                eventType
+              );
+            }
+          });
+      } else {
+        bdk.createBotData(
+          this.props.roomId,
+          botName,
+          'participants' + role.label,
+          JSON.stringify(values)
+        )
+          .then((o) => {
+            if (o.ok) {
+              bdk.createEvents(
+                roomId,
+                currentUser.fullName ? currentUser.fullName : currentUser.name +
+                ' has added ' + values.label +
+                ' to ' + role.label + ' at ' +
+                moment().format('YYYY-MM-DD HH:mm Z'),
+                eventType
+              );
+            }
+          });
+      }
     };
-    if (currentRole[values.role]) {
-      bdk.changeBotData(currentRole[values.role].id,
-        JSON.stringify(values))
-        .then((o) => {
-          if (o.ok) {
-            bdk.createEvents(
-              roomId,
-              currentUser.name + ' has changed ' + values.role +
-              ' to ' + values.label + ' at ' +
-              moment().format('YYYY-MM-DD HH:mm Z'),
-              eventType
-            );
-          }
-        });
-    } else {
-      bdk.createBotData(
-        this.props.roomId,
-        botName,
-        'participants' + values.role,
-        JSON.stringify(values)
-      )
-        .then((o) => {
-          if (o.ok) {
-            bdk.createEvents(
-              roomId,
-              currentUser.name + ' has added ' + values.label +
-              ' to ' + values.role + ' at ' +
-              moment().format('YYYY-MM-DD HH:mm Z'),
-              eventType
-            );
-          }
-        });
-    }
   }
 
   toggleRtl (e) {
@@ -123,11 +128,12 @@ class App extends React.Component{
                 {role.name}
               </div>
               <Select
-                onChange={this.handleSelectChange}
+                onChange={this.handleSelectChange(role)}
                 options={options}
                 placeholder={ 'Choose ' + role.label }
                 rtl={this.state.rtl}
                 value={value[role.label]}
+                clearable={true}
               />
             </div>
           );
