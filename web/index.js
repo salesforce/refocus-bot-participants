@@ -119,7 +119,7 @@ function handleActions(action) {
  * The actions to take before load.
  */
 function init() {
-  bdk.findRoom(roomId);
+  bdk.findRoom(roomId)
     .then((res) => {
       roles = (res.body.settings &&
         (res.body.settings.participantsRoles !== undefined)) ?
