@@ -42,54 +42,72 @@ class App extends React.Component{
     this.setState({ value: currentValues });
   }
 
-  handleSelectChange (values) {
-    const { roomId, currentUser } = this.state;
-    const newValue = this.state.value;
-    newValue[values.role] = values;
-    this.setState({ value: newValue });
-    const currentRole = this.state.currentRole;
-    const eventType = {
-      'type': 'Event',
-      'newUser': values,
+  handleSelectChange (role) {
+    return (inputValue) => {
+      let values = inputValue || null;
+      if ((values) && (values.role === undefined)) {
+        values.label = values.value;
+      }
+      const { roomId, currentUser } = this.state;
+      const newValue = this.state.value;
+      newValue[role.label] = values;
+      this.setState({ value: newValue });
+      const currentRole = this.state.currentRole;
+      const eventType = {
+        'type': 'Event',
+        'newUser': values,
+      };
+      values = values ? values : '';
+      const outputValue = values.label ? values.label : '';
+      if (currentRole[role.label]) {
+        bdk.changeBotData(currentRole[role.label].id,
+          JSON.stringify(values))
+          .then((o) => {
+            if (o.ok) {
+              bdk.createEvents(
+                roomId,
+                (currentUser.fullName ?
+                  currentUser.fullName :currentUser.name) +
+                ' has changed ' + role.label +
+                ' to ' + outputValue + ' at ' +
+                moment().format('YYYY-MM-DD HH:mm Z'),
+                eventType
+              );
+            }
+          });
+      } else {
+        bdk.createBotData(
+          this.props.roomId,
+          botName,
+          'participants' + role.label,
+          JSON.stringify(values)
+        )
+          .then((o) => {
+            if (o.ok) {
+              bdk.createEvents(
+                roomId,
+                (currentUser.fullName ?
+                  currentUser.fullName : currentUser.name) +
+                ' has added ' + outputValue +
+                ' to ' + role.label + ' at ' +
+                moment().format('YYYY-MM-DD HH:mm Z'),
+                eventType
+              );
+            }
+          });
+      }
     };
-    if (currentRole[values.role]) {
-      bdk.changeBotData(currentRole[values.role].id,
-        JSON.stringify(values))
-        .then((o) => {
-          if (o.ok) {
-            bdk.createEvents(
-              roomId,
-              currentUser.name + ' has changed ' + values.role +
-              ' to ' + values.label + ' at ' +
-              moment().format('YYYY-MM-DD HH:mm Z'),
-              eventType
-            );
-          }
-        });
-    } else {
-      bdk.createBotData(
-        this.props.roomId,
-        botName,
-        'participants' + values.role,
-        JSON.stringify(values)
-      )
-        .then((o) => {
-          if (o.ok) {
-            bdk.createEvents(
-              roomId,
-              currentUser.name + ' has added ' + values.label +
-              ' to ' + values.role + ' at ' +
-              moment().format('YYYY-MM-DD HH:mm Z'),
-              eventType
-            );
-          }
-        });
-    }
   }
 
   toggleRtl (e) {
     const rtl = e.target.checked;
     this.setState({ rtl });
+  }
+
+  renderPrompt (role) {
+    return (inputValue) => {
+      return `Add '${inputValue}' to ${role.label}`;
+    };
   }
 
   render() {
@@ -122,12 +140,20 @@ class App extends React.Component{
                 className="slds-text-body_small slds-m-bottom_xx-small">
                 {role.name}
               </div>
-              <Select
-                onChange={this.handleSelectChange}
+              <Select.Creatable
+                onChange={this.handleSelectChange(role)}
                 options={options}
                 placeholder={ 'Choose ' + role.label }
                 rtl={this.state.rtl}
                 value={value[role.label]}
+                promptTextCreator={this.renderPrompt(role)}
+                newOptionCreator={(newOption) => {
+                  return {
+                    label: newOption.label,
+                    value: newOption.label + ' (External)'
+                  };
+                }}
+                clearable={true}
               />
             </div>
           );
