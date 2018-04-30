@@ -62,4 +62,6 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.0 Included fullName functionality
 * 1.1.1 Fixed fullName bug
 * 1.1.2 Remove user entrance and exit code
-
+* 1.1.2 Clear User
+* 1.1.3 Add external user
+* 1.1.4 Remove User Event

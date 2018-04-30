@@ -115,7 +115,6 @@ function handleActions(action) {
   }
 }
 
-
 /**
  * The actions to take before load.
  */
