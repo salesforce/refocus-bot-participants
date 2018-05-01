@@ -116,40 +116,10 @@ function handleActions(action) {
 }
 
 /**
- * When the users leave/reloads the page, send an event to let log
- * the user leaving.
- */
-function confirmExit(){
-  const eventType = {
-    'type': 'User',
-    'user': currentUser,
-    'isActive': false,
-  };
-  bdk.createEvents(
-    roomId,
-    currentUser.name + ' has left the room at ' +
-      moment().format('YYYY-MM-DD HH:mm Z'),
-    eventType
-  );
-}
-
-/**
  * The actions to take before load.
  */
 function init() {
-  bdk.createEvents(
-    roomId,
-    currentUser.name + ' has joined the room at ' +
-      moment().format('YYYY-MM-DD HH:mm Z'),
-    {
-      'type': 'User',
-      'user': currentUser,
-      'isActive': true,
-    }
-  )
-    .then(() => {
-      return bdk.findRoom(roomId);
-    })
+  bdk.findRoom(roomId)
     .then((res) => {
       roles = (res.body.settings &&
         (res.body.settings.participantsRoles !== undefined)) ?
@@ -170,7 +140,6 @@ function init() {
     });
 }
 
-window.onbeforeunload = confirmExit;
 document.getElementById(botName)
   .addEventListener('refocus.events', handleEvents, false);
 document.getElementById(botName)
