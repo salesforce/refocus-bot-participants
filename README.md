@@ -66,3 +66,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.3 Add external user
 * 1.1.4 Remove User Event
 * 1.1.5 Remove extra scripts
+* 1.1.6 Use Serialize instead of stringify
