@@ -4,6 +4,7 @@ import 'react-select/dist/react-select.css';
 import moment from 'moment';
 const React=require('react');
 const _ = require('lodash');
+const serialize = require('serialize-javascript');
 const env = require('../../config.js').env;
 const config = require('../../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
@@ -61,7 +62,7 @@ class App extends React.Component{
       const outputValue = values.label ? values.label : '';
       if (currentRole[role.label]) {
         bdk.changeBotData(currentRole[role.label].id,
-          JSON.stringify(values))
+          serialize(values))
           .then((o) => {
             if (o.ok) {
               bdk.createEvents(
@@ -80,7 +81,7 @@ class App extends React.Component{
           this.props.roomId,
           botName,
           'participants' + role.label,
-          JSON.stringify(values)
+          serialize(values)
         )
           .then((o) => {
             if (o.ok) {
@@ -163,7 +164,7 @@ class App extends React.Component{
           const usernameCSS =
             'slds-m-horizontal_x-small ' +
             'slds-m-bottom_x-small';
-          const hats = JSON.stringify(value).indexOf(id);
+          const hats = serialize(value).indexOf(id);
           if (users[id].isActive) {
             return (
               <div
