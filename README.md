@@ -17,6 +17,7 @@ Note: If you want to test this locally you will need some environment variables:
 * ```API_TOKEN``` - Used for Requests to Refocus. Created in refoucs/tokens/new.
 * ```SOCKET_TOKEN``` (Returned Upon Installation) - Used for Socket Connection.
 * ```NODE_ENV (defaults to 'dev')``` - Used to determine which instance of Refocus to install the bot.
+* ```REFOCUS_URL``` (OPTIONAL) - Used to specify which refocus instance to point to.
 
 ### Running Locally
 * Clone this repo
@@ -66,3 +67,5 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.3 Add external user
 * 1.1.4 Remove User Event
 * 1.1.5 Remove extra scripts
+* 1.1.6 Add env variable for refocus url
+
