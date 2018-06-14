@@ -68,4 +68,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.4 Remove User Event
 * 1.1.5 Remove extra scripts
 * 1.1.6 Add env variable for refocus url
-
+* 1.1.7 Use Serialize instead of stringify
