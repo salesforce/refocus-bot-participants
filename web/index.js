@@ -75,7 +75,7 @@ function createRole() {
 
 function isValidRole(roleName, roleLabel) {
   roles.forEach((role) => {
-    if (role.roleName === roleName || role.roleLabel === roleLabel) {
+    if (role.name === roleName || role.label === roleLabel) {
       return false;
     }
   })
