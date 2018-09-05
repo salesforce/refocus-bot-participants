@@ -159,6 +159,28 @@ class App extends React.Component{
             </div>
           );
         })}
+        <div
+          className="slds-m-horizontal_small slds-m-bottom_small">
+          <div
+            className="slds-text-body_small slds-m-bottom_xx-small">
+            Create New Role
+          </div>
+          <div className="slds-form-element slds-grid">
+            <div className="slds-col slds-form-element__control slds-p-horizontal_xx-small">
+              <input type="text" id="roleName" className="slds-input" placeholder="Role Name" />
+            </div>
+            <div className="slds-col slds-form-element__control slds-p-horizontal_xx-small">
+              <input type="text" id="roleLabel" className="slds-input" placeholder="Role Label" />
+            </div>
+            <div className="slds-p-horizontal_xx-small">
+              <button
+                className="slds-button slds-button_brand"
+                onClick={() => this.props.createRole()}>
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
         <div className={divider}></div>
         {Object.keys(users).map((id) => {
           const usernameCSS =
