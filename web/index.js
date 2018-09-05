@@ -74,13 +74,14 @@ function createRole() {
 }
 
 function isValidRole(roleName, roleLabel) {
+  let valid = true;
   roles.forEach((role) => {
     if (role.name === roleName || role.label === roleLabel) {
-      return false;
+      valid = false;
     }
-  })
+  });
 
-  return true;
+  return valid;
 }
 
 /**
