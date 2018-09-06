@@ -121,7 +121,7 @@ class App extends React.Component{
 
     return (
       <div>
-        {roles.map((role) => {
+        {roles.map((role, index) => {
           const options = [];
           Object.keys(users).forEach((id) => {
             options.push({
@@ -140,9 +140,13 @@ class App extends React.Component{
               key={role.label}>
               <div
                 className="slds-text-body_small slds-m-bottom_xx-small">               
-                <button className="slds-button slds-m-right_x-small slds-required" style={{lineHeight: 'inherit', float: 'left'}}>x</button>
-                <div>{role.name}
-              </div>
+                <button
+                  className="slds-button slds-m-right_x-small slds-required"
+                  style={{lineHeight: 'inherit', float: 'left'}}
+                  onClick={() => this.props.deleteRole(index)}>
+                  x
+                </button>
+                <div>{role.name}</div>
               </div>
 
               <Select.Creatable
@@ -165,8 +169,8 @@ class App extends React.Component{
         })}
         <div
           className="slds-m-horizontal_small slds-m-bottom_small">
-          {creatingRole &&
-            <div>
+          { creatingRole &&
+            <div style={{ minHeight: '200px' }}>
               <section className="slds-modal slds-fade-in-open">
                 <div className="slds-modal__container">
                   <header className="slds-modal__header">

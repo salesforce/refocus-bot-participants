@@ -54,6 +54,7 @@ function renderUI(_users, _roles, _currentRole, _currentUser){
       currentRole={ _currentRole }
       currentUser={ _currentUser }
       createRole= { createRole }
+      deleteRole = { deleteRole }
     />,
     document.getElementById(botName)
   );
@@ -82,6 +83,24 @@ function createRole() {
       roleLabel.value = '';
     });
   }
+}
+
+function deleteRole(index) {
+  const role = roles[index];
+  roles.splice(index, 1);
+
+  bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
+    const eventType = {
+      'type': 'Event',
+    };
+
+    bdk.createEvents(
+      roomId,
+      'Role Deleted: ' +
+        `${role.name} (${role.label})`,
+      eventType
+    );
+  });
 }
 
 function isValidRole(roleName, roleLabel) {
