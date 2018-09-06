@@ -65,8 +65,10 @@ function createRole() {
   const roleLabel = document.getElementById('roleLabel');
 
   if (isValidRole(roleName.value, roleLabel.value)) {
-    const highestOrder = Math.max.apply(Math, roles.map(function(o) { return o.order; }))
-    roles.push({name: roleName.value, label: roleLabel.value, order: highestOrder + 1})
+    const highestOrder = Math.max.apply(Math, roles.map((o) =>
+      { return o.order; }));
+    roles.push({name: roleName.value, label: roleLabel.value,
+      order: highestOrder + 1})
     bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
       const eventType = {
         'type': 'Event',
@@ -198,8 +200,10 @@ function init() {
       return bdk.getBotData(roomId, botName);
     })
     .then((data) => {
-      const rolesBotData = data.body.filter((bd) => bd.name === 'participantsBotRoles')[ZERO];
-      roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
+      const rolesBotData = data.body.filter((bd) => bd.name ===
+        'participantsBotRoles')[ZERO];
+      roles = rolesBotData ?
+        JSON.parse(rolesBotData.value) : rolesFromSettings;
       if (!rolesBotData) {
         bdk.createBotData(roomId, botName,
           'participantsBotRoles', serialize(rolesFromSettings))
