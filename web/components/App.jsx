@@ -21,6 +21,7 @@ class App extends React.Component{
       currentRole: this.props.currentRole,
       currentUser: this.props.currentUser,
       value: {},
+      creatingRole: false,
     };
 
     this.handleSelectChange = this.handleSelectChange.bind(this);
@@ -112,7 +113,7 @@ class App extends React.Component{
   }
 
   render() {
-    const { users, value, roles, currentRole } = this.state;
+    const { users, value, roles, currentRole, creatingRole } = this.state;
 
     const divider = 'slds-m-horizontal_x-small ' +
       'slds-m-vertical_small ' +
@@ -138,9 +139,12 @@ class App extends React.Component{
             <div className="slds-m-horizontal_small slds-m-bottom_small"
               key={role.label}>
               <div
-                className="slds-text-body_small slds-m-bottom_xx-small">
-                {role.name}
+                className="slds-text-body_small slds-m-bottom_xx-small">               
+                <button className="slds-button slds-m-right_x-small slds-required" style={{lineHeight: 'inherit', float: 'left'}}>x</button>
+                <div>{role.name}
               </div>
+              </div>
+
               <Select.Creatable
                 onChange={this.handleSelectChange(role)}
                 options={options}
@@ -161,24 +165,59 @@ class App extends React.Component{
         })}
         <div
           className="slds-m-horizontal_small slds-m-bottom_small">
-          <div
-            className="slds-text-body_small slds-m-bottom_xx-small">
-            Create New Role
-          </div>
-          <div className="slds-form-element slds-grid">
-            <div className="slds-col slds-form-element__control slds-p-horizontal_xx-small">
-              <input type="text" id="roleName" className="slds-input" placeholder="Role Name" />
+          {creatingRole &&
+            <div>
+              <section className="slds-modal slds-fade-in-open">
+                <div className="slds-modal__container">
+                  <header className="slds-modal__header">
+                    <h2 className="slds-text-heading_medium slds-hyphenate">
+                      Create New Role
+                    </h2>
+                  </header>
+                  <div className="slds-modal__content slds-p-around_medium">
+                    <div className="slds-form-element slds-grid">
+                      <div className="slds-col slds-p-horizontal_xx-small">
+                        <input type="text"
+                          id="roleName"
+                          className="slds-input" 
+                          placeholder="Role Name"/>
+                      </div>
+                      <div className="slds-col slds-p-horizontal_xx-small">
+                        <input type="text"
+                          id="roleLabel"
+                          className="slds-input"
+                          placeholder="Role Label"/>
+                      </div>
+                    </div>
+                  </div>
+                  <footer className="slds-modal__footer">
+                    <button
+                      className="slds-button slds-button_neutral"
+                      onClick = {() => this.setState({creatingRole: false})}>
+                      Cancel
+                    </button>
+                    <button
+                      className="slds-button slds-button_brand"
+                      onClick={() => {
+                        this.props.createRole();
+                        this.setState({ creatingRole: false });
+                      }}>
+                      Create Role
+                    </button>
+                  </footer>
+                </div>
+              </section>
+              <div className="slds-backdrop slds-backdrop_open"></div>
             </div>
-            <div className="slds-col slds-form-element__control slds-p-horizontal_xx-small">
-              <input type="text" id="roleLabel" className="slds-input" placeholder="Role Label" />
-            </div>
-            <div className="slds-p-horizontal_xx-small">
+          }
+          <div className="slds-m-horizontal_small slds-m-bottom_small">
+            <span className="slds-col">
               <button
-                className="slds-button slds-button_brand"
-                onClick={() => this.props.createRole()}>
-                Create
+                className="slds-button slds-align_absolute-center"
+                onClick={ () => this.setState({ creatingRole: true }) }>
+                + Create New Role
               </button>
-            </div>
+            </span>
           </div>
         </div>
         <div className={divider}></div>
