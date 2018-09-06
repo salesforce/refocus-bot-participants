@@ -150,7 +150,7 @@ class App extends React.Component{
                 className="slds-text-body_small slds-m-bottom_xx-small">               
                 <button
                   className="slds-button slds-m-right_x-small slds-required"
-                  style={{lineHeight: 'inherit', float: 'left'}}
+                  style={{ lineHeight: 'inherit', float: 'left' }}
                   onClick={() => this.props.deleteRole(index)}>
                   x
                 </button>

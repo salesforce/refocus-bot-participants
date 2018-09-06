@@ -31,10 +31,9 @@ const currentUser = {
   fullName: bdk.getUserFullName(),
 };
 
-let rolesBotDataId;
-
 let roles = [];
 const currentRole = {};
+let rolesBotDataId;
 
 /**
  * This is the main function to render the UI
