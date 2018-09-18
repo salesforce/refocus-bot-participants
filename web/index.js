@@ -20,6 +20,7 @@ const App = require('./components/App.jsx');
 const env = require('../config.js').env;
 const config = require('../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
+const serialize = require('serialize-javascript');
 const botName = require('../package.json').name;
 const roomId = bdk.getRoomId();
 const ZERO = 0;
@@ -29,8 +30,10 @@ const currentUser = {
   email: bdk.getUserEmail(),
   fullName: bdk.getUserFullName(),
 };
+
 let roles = [];
 const currentRole = {};
+let rolesBotDataId;
 
 /**
  * This is the main function to render the UI
@@ -49,9 +52,71 @@ function renderUI(_users, _roles, _currentRole, _currentUser){
       roles={ _roles }
       currentRole={ _currentRole }
       currentUser={ _currentUser }
+      createRole= { createRole }
+      deleteRole = { deleteRole }
     />,
     document.getElementById(botName)
   );
+}
+
+function createRole() {
+  const roleName = document.getElementById('roleName');
+  const roleLabel = document.getElementById('roleLabel');
+
+  if (isValidRole(roleName.value, roleLabel.value)) {
+    const highestOrder = Math.max.apply(Math, roles.map((o) =>
+      { return o.order; }));
+    roles.push({name: roleName.value, label: roleLabel.value,
+      order: highestOrder + 1})
+    bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
+      const eventType = {
+        'type': 'Event',
+      };
+
+      bdk.createEvents(
+        roomId,
+        'New Role Created: ' +
+          `${roleName.value} (${roleLabel.value})`,
+        eventType
+      );
+
+      roleName.value = '';
+      roleLabel.value = '';
+    });
+  }
+}
+
+function deleteRole(index) {
+  const role = roles[index];
+  roles.splice(index, 1);
+
+  bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
+    const eventType = {
+      'type': 'Event',
+    };
+
+    bdk.createEvents(
+      roomId,
+      'Role Deleted: ' +
+        `${role.name} (${role.label})`,
+      eventType
+    );
+  });
+}
+
+function isValidRole(roleName, roleLabel) {
+  if (!roleName.length || !roleLabel.length) {
+    return false;
+  }
+
+  let valid = true;
+  roles.forEach((role) => {
+    if (role.name === roleName || role.label === roleLabel) {
+      valid = false;
+    }
+  });
+
+  return valid;
 }
 
 /**
@@ -94,12 +159,17 @@ function handleSettings(room) {
 function handleData(data) {
   if (data.detail.roomId === roomId) {
     bdk.log.debug('Bot Data Event Received: ', data.detail);
-    const label = data.detail.name.replace('participants', '');
-    if (!currentRole[label]) {
-      currentRole[label] = {};
-      currentRole[label].id = data.detail.id;
+    if (data.detail.name === 'participantsBotRoles') {
+      roles = JSON.parse(data.detail.value);
+    } else {
+      const label = data.detail.name.replace('participants', '');
+      if (!currentRole[label]) {
+        currentRole[label] = {};
+        currentRole[label].id = data.detail.id;
+      }
+      currentRole[label].value = data.detail.value;
     }
-    currentRole[label].value = data.detail.value;
+
     renderUI(null, roles, currentRole, currentUser);
   }
 }
@@ -119,15 +189,28 @@ function handleActions(action) {
  * The actions to take before load.
  */
 function init() {
-  bdk.findRoom(roomId, botName)
+  let rolesFromSettings = [];
+
+  bdk.findRoom(roomId)
     .then((res) => {
-      roles = (res.body.settings &&
+      rolesFromSettings = (res.body.settings &&
         (res.body.settings.participantsRoles !== undefined)) ?
-        res.body.settings.participantsRoles :
-        [];
-      return bdk.getBotData(roomId);
+        res.body.settings.participantsRoles : [];
+      return bdk.getBotData(roomId, botName);
     })
     .then((data) => {
+      const rolesBotData = data.body.filter((bd) => bd.name ===
+        'participantsBotRoles')[ZERO];
+      roles = rolesBotData ?
+        JSON.parse(rolesBotData.value) : rolesFromSettings;
+      if (!rolesBotData) {
+        bdk.createBotData(roomId, botName,
+          'participantsBotRoles', serialize(rolesFromSettings))
+        .then((res) => rolesBotDataId = res.body.id);
+      } else {
+        rolesBotDataId = rolesBotData.id;
+      }
+
       roles.forEach((role) => {
         currentRole[role.label] = data.body
           .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
