@@ -73,3 +73,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.9 Added display name.
 * 1.1.10 Fix botname missing for bdk getBotData.
 * 1.1.11 Functionality to create & delete roles.
+* 1.1.12 Create events with more consistant messages.
