@@ -34,6 +34,7 @@ const currentUser = {
 let roles = [];
 const currentRole = {};
 let rolesBotDataId;
+let showingError = false;
 
 /**
  * This is the main function to render the UI
@@ -44,12 +45,13 @@ let rolesBotDataId;
  * @param {Object} _currentRole - The current role of user
  * @param {Object} _currentUser - The current user on page
  */
-function renderUI(_users, _roles, _currentRole, _currentUser){
+function renderUI(_users, _roles, _currentRole, _showingError, _currentUser){
   ReactDOM.render(
     <App
       roomId={ roomId }
       users={ _users }
       roles={ _roles }
+      showingError={_showingError}
       currentRole={ _currentRole }
       currentUser={ _currentUser }
       createRole= { createRole }
@@ -66,27 +68,35 @@ function createRole() {
   const nameString = roleName.value;
   const labelString = roleLabel.value === "" ? nameString.replace(/ /g, '') : roleLabel.value;
 
-  if (isValidRole(nameString, labelString)) {
-    const highestOrder = Math.max.apply(Math, roles.map((o) =>
-      { return o.order; }));
-    roles.push({name: nameString, label: labelString,
-      order: highestOrder + 1})
-    bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
-      const eventType = {
-        'type': 'Event',
-      };
+  return new Promise( (resolve) => {
+    if (isValidRole(nameString, labelString)) {
+      const highestOrder = Math.max.apply(Math, roles.map((o) =>
+        { return o.order; }));
+      roles.push({name: nameString, label: labelString,
+        order: highestOrder + 1})
+      bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
+        const eventType = {
+          'type': 'Event',
+        };
 
-      bdk.createEvents(
-        roomId,
-        'New Role Created: ' +
-          `${nameString} (${labelString})`,
-        eventType
-      );
+        bdk.createEvents(
+          roomId,
+          'New Role Created: ' +
+            `${nameString} (${labelString})`,
+          eventType
+        );
 
-      roleName.value = '';
-      roleLabel.value = '';
-    });
-  }
+        roleName.value = '';
+        roleLabel.value = '';
+        showingError = false;
+        resolve(false);
+      });
+    } else {
+      showingError = true;
+      resolve(true);
+    }
+    renderUI(null, roles, currentRole, showingError, currentUser);
+  });
 }
 
 function deleteRole(index) {
@@ -108,7 +118,7 @@ function deleteRole(index) {
 }
 
 function isValidRole(roleName, roleLabel) {
-  if (!roleName.length || !roleLabel.length) {
+  if (!roleName.length || /\s/.test(roleLabel)) {
     return false;
   }
 
@@ -140,7 +150,7 @@ function handleEvents(event) {
         isActive: event.detail.context.isActive,
         fullName: event.detail.context.user.fullName,
       };
-      renderUI(userChange, roles, currentRole, currentUser);
+      renderUI(userChange, roles, currentRole, showingError, currentUser);
     }
   }
 }
@@ -173,7 +183,7 @@ function handleData(data) {
       currentRole[label].value = data.detail.value;
     }
 
-    renderUI(null, roles, currentRole, currentUser);
+    renderUI(null, roles, currentRole, showingError, currentUser);
   }
 }
 
@@ -222,7 +232,7 @@ function init() {
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
-      renderUI(users, roles, currentRole, currentUser);
+      renderUI(users, roles, currentRole, showingError, currentUser);
     });
 }
 
