@@ -31,7 +31,6 @@ class App extends React.Component{
       value: {},
       creatingRole: false,
     };
-
     this.handleSelectChange = this.handleSelectChange.bind(this);
     this.toggleRtl = this.toggleRtl.bind(this);
   }
@@ -185,7 +184,10 @@ class App extends React.Component{
                     </h2>
                   </header>
                   <div className="slds-modal__content slds-p-around_medium">
-                    <div className="slds-text-color_error slds-text-align_center">Error, please provide a role name</div>
+                  {this.props.showingError &&
+                    <div id="errorText" className="slds-text-color_error slds-text-align_center">
+                      Error, please provide a role name
+                    </div>}
                     <div className="slds-form-element slds-grid">
                       <div className="slds-col slds-p-horizontal_xx-small">
                         <input type="text"
@@ -210,8 +212,9 @@ class App extends React.Component{
                     <button
                       className="slds-button slds-button_brand"
                       onClick={() => {
-                        this.props.createRole();
-                        this.setState({ creatingRole: false });
+                        this.props.createRole().then( (resolution) => {
+                          this.setState({creatingRole: resolution});
+                        });
                       }}>
                       Create Role
                     </button>
@@ -268,6 +271,7 @@ App.propTypes={
   roomId: PropTypes.number,
   users: PropTypes.object,
   roles: PropTypes.array,
+  showingError: PropTypes.bool,
   currentRole: PropTypes.object,
   currentUser: PropTypes.object,
 };
