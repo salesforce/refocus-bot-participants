@@ -184,10 +184,12 @@ class App extends React.Component{
                     </h2>
                   </header>
                   <div className="slds-modal__content slds-p-around_medium">
-                  {this.props.showingError &&
-                    <div id="errorText" className="slds-text-color_error slds-text-align_center">
-                      Error, please provide a role name
-                    </div>}
+                    {
+                      this.props.showingError &&
+                      <div id="errorText" className="slds-text-color_error slds-text-align_center">
+                        Error, please provide a role name
+                      </div>
+                    }
                     <div className="slds-form-element slds-grid">
                       <div className="slds-col slds-p-horizontal_xx-small">
                         <input type="text"
