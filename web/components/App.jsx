@@ -217,8 +217,8 @@ class App extends React.Component{
                     <button
                       className="slds-button slds-button_brand"
                       onClick={() => {
-                        this.props.createRole().then( (resolution) => {
-                          this.setState({creatingRole: resolution});
+                        this.props.createRole().then( (creatingRole) => {
+                          this.setState({creatingRole});
                         });
                       }}>
                       Create Role
