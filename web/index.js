@@ -24,6 +24,9 @@ const serialize = require('serialize-javascript');
 const botName = require('../package.json').name;
 const roomId = bdk.getRoomId();
 const ZERO = 0;
+const ERR_NO_ROLE_NAME = 1;
+const ERR_SPACE_IN_ROLE_LABEL = 2;
+const ERR_ROLE_ALREADY_EXISTS = 3;
 const currentUser = {
   name: bdk.getUserName(),
   id: bdk.getUserId(),
@@ -34,7 +37,7 @@ const currentUser = {
 let roles = [];
 const currentRole = {};
 let rolesBotDataId;
-let showingError = false;
+let showingError = 0;
 
 /**
  * This is the main function to render the UI
@@ -69,7 +72,8 @@ function createRole() {
   const labelString = roleLabel.value === "" ? nameString.replace(/ /g, '') : roleLabel.value;
 
   return new Promise( (resolve) => {
-    if (isValidRole(nameString, labelString)) {
+    const validRole = isValidRole(nameString, labelString);
+    if (validRole === 0) {
       const highestOrder = Math.max.apply(Math, roles.map((o) =>
         { return o.order; }));
       roles.push({name: nameString, label: labelString,
@@ -88,14 +92,16 @@ function createRole() {
 
         roleName.value = '';
         roleLabel.value = '';
-        showingError = false;
+        showingError = validRole;
         resolve(false);
+        renderUI(null, roles, currentRole, showingError, currentUser);
       });
     } else {
-      showingError = true;
+      showingError = validRole;
       resolve(true);
+      renderUI(null, roles, currentRole, showingError, currentUser);
     }
-    renderUI(null, roles, currentRole, showingError, currentUser);
+    
   });
 }
 
@@ -118,14 +124,16 @@ function deleteRole(index) {
 }
 
 function isValidRole(roleName, roleLabel) {
-  if (!roleName.length || /\s/.test(roleLabel)) {
-    return false;
+  if (!roleName.length) {
+    return ERR_NO_ROLE_NAME;
+  } else if (/\s/.test(roleLabel)) {
+    return ERR_SPACE_IN_ROLE_LABEL;
   }
 
-  let valid = true;
+  let valid = ZERO;
   roles.forEach((role) => {
     if (role.name === roleName || role.label === roleLabel) {
-      valid = false;
+      valid = ERR_ROLE_ALREADY_EXISTS;
     }
   });
 
