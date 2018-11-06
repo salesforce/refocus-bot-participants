@@ -188,12 +188,11 @@ class App extends React.Component{
                   </header>
                   <div className="slds-modal__content slds-p-around_medium">
                     {
-                      this.props.showingError &&
+                      this.props.showingError !== 0 &&
                       <div id="errorText" className="slds-text-color_error slds-text-align_center">
                         {errorTexts[this.props.showingError - 1]}
                       </div>
                     }
-                    {console.log(`this.props.showingError = ${this.props.showingError}`)}
                     <div className="slds-form-element slds-grid">
                       <div className="slds-col slds-p-horizontal_xx-small">
                         <input type="text"
