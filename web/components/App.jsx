@@ -18,6 +18,7 @@ const config = require('../../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../../package.json').name;
 const MIN_HATS = 0;
+const errorTexts = ['Error, please provide a role name','Error, please do not include spaces in role label','Error, a role with this name/label already exists'];
 
 class App extends React.Component{
   constructor(props){
@@ -187,9 +188,10 @@ class App extends React.Component{
                     {
                       this.props.showingError &&
                       <div id="errorText" className="slds-text-color_error slds-text-align_center">
-                        Error, please provide a role name
+                        {errorTexts[this.props.showingError - 1]}
                       </div>
                     }
+                    {console.log(`this.props.showingError = ${this.props.showingError}`)}
                     <div className="slds-form-element slds-grid">
                       <div className="slds-col slds-p-horizontal_xx-small">
                         <input type="text"
