@@ -48,13 +48,13 @@ let showingError = 0;
  * @param {Object} _currentRole - The current role of user
  * @param {Object} _currentUser - The current user on page
  */
-function renderUI(_users, _roles, _currentRole, _showingError, _currentUser){
+function renderUI(_users, _roles, _currentRole, _currentUser){
   ReactDOM.render(
     <App
       roomId={ roomId }
       users={ _users }
       roles={ _roles }
-      showingError={_showingError}
+      showingError={ showingError}
       currentRole={ _currentRole }
       currentUser={ _currentUser }
       createRole= { createRole }
@@ -94,12 +94,12 @@ function createRole() {
         roleLabel.value = '';
         showingError = validRole;
         resolve(false);
-        renderUI(null, roles, currentRole, showingError, currentUser);
+        renderUI(null, roles, currentRole, currentUser);
       });
     } else {
       showingError = validRole;
       resolve(true);
-      renderUI(null, roles, currentRole, showingError, currentUser);
+      renderUI(null, roles, currentRole, currentUser);
     }
     
   });
@@ -158,7 +158,7 @@ function handleEvents(event) {
         isActive: event.detail.context.isActive,
         fullName: event.detail.context.user.fullName,
       };
-      renderUI(userChange, roles, currentRole, showingError, currentUser);
+      renderUI(userChange, roles, currentRole, currentUser);
     }
   }
 }
@@ -191,7 +191,7 @@ function handleData(data) {
       currentRole[label].value = data.detail.value;
     }
 
-    renderUI(null, roles, currentRole, showingError, currentUser);
+    renderUI(null, roles, currentRole, currentUser);
   }
 }
 
@@ -240,7 +240,7 @@ function init() {
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
-      renderUI(users, roles, currentRole, showingError, currentUser);
+      renderUI(users, roles, currentRole, currentUser);
     });
 }
 
