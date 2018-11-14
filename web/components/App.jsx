@@ -18,6 +18,9 @@ const config = require('../../config.js')[env];
 const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../../package.json').name;
 const MIN_HATS = 0;
+const errorTexts = ['Error, please provide a role name',
+                    'Error, please do not include spaces in role label',
+                    'Error, a role with this name/label already exists'];
 
 class App extends React.Component{
   constructor(props){
@@ -31,7 +34,6 @@ class App extends React.Component{
       value: {},
       creatingRole: false,
     };
-
     this.handleSelectChange = this.handleSelectChange.bind(this);
     this.toggleRtl = this.toggleRtl.bind(this);
   }
@@ -185,6 +187,12 @@ class App extends React.Component{
                     </h2>
                   </header>
                   <div className="slds-modal__content slds-p-around_medium">
+                    {
+                      this.props.showingError !== 0 &&
+                      <div id="errorText" className="slds-text-color_error slds-text-align_center">
+                        {errorTexts[this.props.showingError - 1]}
+                      </div>
+                    }
                     <div className="slds-form-element slds-grid">
                       <div className="slds-col slds-p-horizontal_xx-small">
                         <input type="text"
@@ -209,8 +217,9 @@ class App extends React.Component{
                     <button
                       className="slds-button slds-button_brand"
                       onClick={() => {
-                        this.props.createRole();
-                        this.setState({ creatingRole: false });
+                        this.props.createRole().then( (creatingRole) => {
+                          this.setState({creatingRole});
+                        });
                       }}>
                       Create Role
                     </button>
@@ -267,6 +276,7 @@ App.propTypes={
   roomId: PropTypes.number,
   users: PropTypes.object,
   roles: PropTypes.array,
+  showingError: PropTypes.number,
   currentRole: PropTypes.object,
   currentUser: PropTypes.object,
 };
