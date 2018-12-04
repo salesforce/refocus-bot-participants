@@ -24,6 +24,9 @@ const serialize = require('serialize-javascript');
 const botName = require('../package.json').name;
 const roomId = bdk.getRoomId();
 const ZERO = 0;
+const ERR_NO_ROLE_NAME = 1;
+const ERR_SPACE_IN_ROLE_LABEL = 2;
+const ERR_ROLE_ALREADY_EXISTS = 3;
 const currentUser = {
   name: bdk.getUserName(),
   id: bdk.getUserId(),
@@ -34,6 +37,7 @@ const currentUser = {
 let roles = [];
 const currentRole = {};
 let rolesBotDataId;
+let showingError = 0;
 
 /**
  * This is the main function to render the UI
@@ -50,6 +54,7 @@ function renderUI(_users, _roles, _currentRole, _currentUser){
       roomId={ roomId }
       users={ _users }
       roles={ _roles }
+      showingError={ showingError}
       currentRole={ _currentRole }
       currentUser={ _currentUser }
       createRole= { createRole }
@@ -63,27 +68,41 @@ function createRole() {
   const roleName = document.getElementById('roleName');
   const roleLabel = document.getElementById('roleLabel');
 
-  if (isValidRole(roleName.value, roleLabel.value)) {
-    const highestOrder = Math.max.apply(Math, roles.map((o) =>
-      { return o.order; }));
-    roles.push({name: roleName.value, label: roleLabel.value,
-      order: highestOrder + 1})
-    bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
-      const eventType = {
-        'type': 'Event',
-      };
+  const nameString = roleName.value;
+  const labelString = roleLabel.value === "" ? nameString.replace(/ /g, '') : roleLabel.value;
 
-      bdk.createEvents(
-        roomId,
-        'New Role Created: ' +
-          `${roleName.value} (${roleLabel.value})`,
-        eventType
-      );
+  return new Promise( (resolve) => {
+    const validRole = isValidRole(nameString, labelString);
+    if (validRole === 0) {
+      const highestOrder = Math.max.apply(Math, roles.map((o) =>
+        { return o.order; }));
+      roles.push({name: nameString, label: labelString,
+        order: highestOrder + 1})
+      bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
+        const eventType = {
+          'type': 'Event',
+        };
 
-      roleName.value = '';
-      roleLabel.value = '';
-    });
-  }
+        bdk.createEvents(
+          roomId,
+          'New Role Created: ' +
+            `${nameString} (${labelString})`,
+          eventType
+        );
+
+        roleName.value = '';
+        roleLabel.value = '';
+        showingError = validRole;
+        resolve(false);
+        renderUI(null, roles, currentRole, currentUser);
+      });
+    } else {
+      showingError = validRole;
+      resolve(true);
+      renderUI(null, roles, currentRole, currentUser);
+    }
+    
+  });
 }
 
 function deleteRole(index) {
@@ -105,14 +124,16 @@ function deleteRole(index) {
 }
 
 function isValidRole(roleName, roleLabel) {
-  if (!roleName.length || !roleLabel.length) {
-    return false;
+  if (!roleName.length) {
+    return ERR_NO_ROLE_NAME;
+  } else if (/\s/.test(roleLabel)) {
+    return ERR_SPACE_IN_ROLE_LABEL;
   }
 
-  let valid = true;
+  let valid = ZERO;
   roles.forEach((role) => {
     if (role.name === roleName || role.label === roleLabel) {
-      valid = false;
+      valid = ERR_ROLE_ALREADY_EXISTS;
     }
   });
 
