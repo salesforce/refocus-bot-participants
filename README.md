@@ -75,3 +75,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.11 Functionality to create & delete roles.
 * 1.1.12 Create events with more consistant messages.
 * 1.1.13 Made role label optional, added error message.
+* 1.1.14 Clean up config.js.
