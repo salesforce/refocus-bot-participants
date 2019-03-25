@@ -19,25 +19,22 @@ module.exports = {
   env: process.env.NODE_ENV || 'dev',
   port: process.env.PORT || DEFAULT_PORT,
   dev: {
-    refocusUrl: process.env.REFOCUS_URL ||
-      'http://localhost:3000',
+    refocusUrl: process.env.REFOCUS_DEV_URL,
     token: process.env.API_TOKEN,
     socketToken: process.env.SOCKET_TOKEN,
   },
   perf: {
-    refocusUrl: process.env.REFOCUS_URL,
+    refocusUrl: process.env.REFOCUS_PERF_URL,
     token: process.env.API_TOKEN,
     socketToken: process.env.SOCKET_TOKEN,
   },
   sandbox: {
-    refocusUrl: process.env.REFOCUS_URL ||
-      'https://refocus-sandbox.hk.salesforce.com',
+    refocusUrl: process.env.REFOCUS_SANDBOX_URL,
     token: process.env.API_TOKEN,
     socketToken: process.env.SOCKET_TOKEN,
   },
   production: {
-    refocusUrl: process.env.REFOCUS_URL ||
-      'https://refocus.hk.salesforce.com',
+    refocusUrl: process.env.REFOCUS_PRODUCTION_URL,
     token: process.env.API_TOKEN,
     socketToken: process.env.SOCKET_TOKEN,
   },
