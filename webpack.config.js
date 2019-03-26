@@ -8,7 +8,6 @@
 
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
 const ZipPlugin = require('zip-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const env = require('./config.js').env;

@@ -5,17 +5,16 @@
  * For full license text, see LICENSE.txt file in the repo root or
  * https://opensource.org/licenses/BSD-3-Clause
  */
- 
+
 /**
  * /web/index.js
  *
- * This code handles intial render of the bot and any rerenders triggered
+ * This code handles initial render of the bot and any re-renders triggered
  * from javascript events.
  */
 
 const React = require('react');
 const ReactDOM = require('react-dom');
-const moment = require('moment');
 const App = require('./components/App.jsx');
 const env = require('../config.js').env;
 const config = require('../config.js')[env];
@@ -39,6 +38,7 @@ const currentRole = {};
 let rolesBotDataId;
 let showingError = 0;
 
+/* eslint-disable no-use-before-define */
 /**
  * This is the main function to render the UI
  *
@@ -48,36 +48,48 @@ let showingError = 0;
  * @param {Object} _currentRole - The current role of user
  * @param {Object} _currentUser - The current user on page
  */
-function renderUI(_users, _roles, _currentRole, _currentUser){
+function renderUI(_users, _roles, _currentRole, _currentUser) {
   ReactDOM.render(
     <App
-      roomId={ roomId }
-      users={ _users }
-      roles={ _roles }
-      showingError={ showingError}
-      currentRole={ _currentRole }
-      currentUser={ _currentUser }
-      createRole= { createRole }
-      deleteRole = { deleteRole }
+      roomId={roomId}
+      users={_users}
+      roles={_roles}
+      showingError={showingError}
+      currentRole={_currentRole}
+      currentUser={_currentUser}
+      createRole={createRole}
+      deleteRole={deleteRole}
     />,
     document.getElementById(botName)
   );
 }
 
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-magic-numbers */
+/* eslint-disable no-magic-numbers */
+/* eslint-disable prefer-spread */
+/**
+ * Creates a role
+ * @returns {Promise<any>}
+ */
 function createRole() {
   const roleName = document.getElementById('roleName');
   const roleLabel = document.getElementById('roleLabel');
 
   const nameString = roleName.value;
-  const labelString = roleLabel.value === "" ? nameString.replace(/ /g, '') : roleLabel.value;
+  const labelString = roleLabel.value === '' ?
+    nameString.replace(/ /g, '') : roleLabel.value;
 
-  return new Promise( (resolve) => {
+  return new Promise((resolve) => {
     const validRole = isValidRole(nameString, labelString);
     if (validRole === 0) {
-      const highestOrder = Math.max.apply(Math, roles.map((o) =>
-        { return o.order; }));
-      roles.push({name: nameString, label: labelString,
-        order: highestOrder + 1})
+      const highestOrder = Math.max.apply(Math, roles.map((o) => {
+        return o.order;
+      }));
+      roles.push({
+        name: nameString, label: labelString,
+        order: highestOrder + 1
+      });
       bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
         const eventType = {
           'type': 'Event',
@@ -86,7 +98,7 @@ function createRole() {
         bdk.createEvents(
           roomId,
           'New Role Created: ' +
-            `${nameString} (${labelString})`,
+          `${nameString} (${labelString})`,
           eventType
         );
 
@@ -101,10 +113,14 @@ function createRole() {
       resolve(true);
       renderUI(null, roles, currentRole, currentUser);
     }
-    
   });
 }
 
+/**
+ * Delete role
+ *
+ * @param {number} index - role to be removed
+ */
 function deleteRole(index) {
   const role = roles[index];
   roles.splice(index, 1);
@@ -117,12 +133,19 @@ function deleteRole(index) {
     bdk.createEvents(
       roomId,
       'Role Deleted: ' +
-        `${role.name} (${role.label})`,
+      `${role.name} (${role.label})`,
       eventType
     );
   });
 }
 
+/**
+ * Check if role name and label are valid.
+ *
+ * @param {String} roleName
+ * @param {String} roleLabel
+ * @returns {number}
+ */
 function isValidRole(roleName, roleLabel) {
   if (!roleName.length) {
     return ERR_NO_ROLE_NAME;
@@ -224,12 +247,13 @@ function init() {
         'participantsBotRoles')[ZERO];
       roles = rolesBotData ?
         JSON.parse(rolesBotData.value) : rolesFromSettings;
-      if (!rolesBotData) {
+      if (rolesBotData) {
+        rolesBotDataId = rolesBotData.id;
+      } else {
+        /* eslint-disable no-return-assign */
         bdk.createBotData(roomId, botName,
           'participantsBotRoles', serialize(rolesFromSettings))
-        .then((res) => rolesBotDataId = res.body.id);
-      } else {
-        rolesBotDataId = rolesBotData.id;
+          .then((res) => rolesBotDataId = res.body.id);
       }
 
       roles.forEach((role) => {
