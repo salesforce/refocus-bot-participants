@@ -1,5 +1,8 @@
 # Participants-Bot
+
 This a bot to be used in [Refocus Rooms](https://github.com/salesforce/refocus) to see what users are currently in the a room and assigned them different hats (roles).
+
+[![Build Status](https://travis-ci.org/salesforce/refocus-bot-participants.svg?branch=master)](https://travis-ci.org/salesforce/refocus-bot-participants.svg)
 
 ## Features
 * List of active user
