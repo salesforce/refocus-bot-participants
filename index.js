@@ -5,14 +5,12 @@
  * For full license text, see LICENSE.txt file in the repo root or
  * https://opensource.org/licenses/BSD-3-Clause
  */
- 
 /**
  * ./index.js
  *
  * This code handles will listen to refocus and handle any activity
  * that requires the bot server attention.
  */
-
 require('dotenv').config();
 const express = require('express');
 const app = express();
