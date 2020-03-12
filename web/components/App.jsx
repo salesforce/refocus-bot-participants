@@ -15,8 +15,8 @@ const _ = require('lodash');
 const serialize = require('serialize-javascript');
 const env = require('../../config.js').env;
 const config = require('../../config.js')[env];
-const bdk = require('@salesforce/refocus-bdk')(config);
 const botName = require('../../package.json').name;
+const bdk = require('@salesforce/refocus-bdk')(config, botName);
 const MIN_HATS = 0;
 const errorTexts = ['Error, please provide a role name',
   'Error, please do not include spaces in role label',
