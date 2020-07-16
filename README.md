@@ -81,3 +81,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.14 Clean up config.js.
 * 1.1.15 Upgrade packages from npm audit findings.
 * 1.1.16 Updated frontend bdk instantiations for realtime app.
+* 1.1.17 Updated bdk to avail of new getActiveUsers code change.
