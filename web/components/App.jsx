@@ -38,6 +38,22 @@ class App extends React.Component {
     this.toggleRtl = this.toggleRtl.bind(this);
   }
 
+  /**
+   * @param role
+   * @param participant
+   */
+  assignParticipants(roomId, role, participant) {
+    bdk.getBotData(roomId, botName, 'assignedParticipants')
+      .then((botData) => {
+        const botDataParticipants = JSON.parse(botData.body[0].value);
+        botDataParticipants[role] = participant;
+        return botDataParticipants;
+      })
+      .then((participants) => {
+        bdk.upsertBotData(roomId, botName, 'assignedParticipants', serialize(participants));
+      });
+  }
+
   /* eslint-disable react/no-deprecated */
   componentWillReceiveProps(nextProps) {
     if (nextProps.users !== null) {
@@ -73,6 +89,8 @@ class App extends React.Component {
       values = values ? values : '';
       const outputValue = values.label ? values.label : '';
       if (currentRole[role.label]) {
+        this.assignParticipants(roomId, role.label, values);
+
         bdk.changeBotData(currentRole[role.label].id,
           serialize(values))
           .then((o) => {
@@ -88,6 +106,8 @@ class App extends React.Component {
             }
           });
       } else {
+        this.assignParticipants(roomId, role.label, values);
+
         bdk.createBotData(
           this.props.roomId,
           botName,
