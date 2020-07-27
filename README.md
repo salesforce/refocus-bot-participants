@@ -74,11 +74,12 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.7 Use Serialize instead of stringify
 * 1.1.8 Uglify for production.
 * 1.1.9 Added display name.
-* 1.1.10 Fix botname missing for bdk getBotData.
+* 1.1.10 Fix bot name missing for bdk getBotData.
 * 1.1.11 Functionality to create & delete roles.
-* 1.1.12 Create events with more consistant messages.
+* 1.1.12 Create events with more consistent messages.
 * 1.1.13 Made role label optional, added error message.
 * 1.1.14 Clean up config.js.
 * 1.1.15 Upgrade packages from npm audit findings.
 * 1.1.16 Updated frontend bdk instantiations for realtime app.
 * 1.1.17 Updated bdk to avail of new getActiveUsers code change.
+* 1.2.0 New bot data aggregating all the participant roles.

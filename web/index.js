@@ -186,7 +186,7 @@ function handleEvents(event) {
 /**
  * When a refocus.room.settings is dispatch it is handled here.
  *
- * @param {Object} Room - Room object that was dispatched
+ * @param {Object} room - Room object that was dispatched
  */
 function handleSettings(room) {
   bdk.log.debug('Settings Change Event received: ', room);
@@ -195,7 +195,7 @@ function handleSettings(room) {
 /**
  * When a refocus.bot.data is dispatch it is handled here.
  *
- * @param {Object} BotData - Bot Data object that was dispatched
+ * @param {Object} data - Bot Data object that was dispatched
  */
 function handleData(data) {
   if (data.detail.roomId === roomId) {
@@ -227,8 +227,8 @@ function handleActions(action) {
 }
 
 /**
- * @param data
- * @param rolesFromSettings
+ * @param {Object} data - request
+ * @param {Object} rolesFromSettings - from RoomType
  */
 function createBotRoles(data, rolesFromSettings) {
   const rolesBotData = data.body.filter((bd) => bd.name ===
