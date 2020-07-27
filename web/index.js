@@ -227,6 +227,44 @@ function handleActions(action) {
 }
 
 /**
+ * @param data
+ * @param rolesFromSettings
+ */
+function createBotRoles(data, rolesFromSettings) {
+  const rolesBotData = data.body.filter((bd) => bd.name ===
+    'participantsBotRoles')[ZERO];
+  roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
+  if (rolesBotData) {
+    rolesBotDataId = rolesBotData.id;
+  } else {
+    /* eslint-disable no-return-assign */
+    bdk.createBotData(roomId, botName,
+      'participantsBotRoles', serialize(rolesFromSettings))
+      .then((res) => rolesBotDataId = res.body.id);
+  }
+
+  roles.forEach((role) => {
+    currentRole[role.label] = data.body
+      .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
+  });
+}
+
+/**
+ * Initiate an empty bot data that will contains all the participants in the room
+ * if it's not created yet.
+ *
+ * @param {Array} listOfBotData - all the bot data for the room & participant-bot
+ */
+function assignParticipants(listOfBotData) {
+  if (!listOfBotData) return;
+  const ASSIGNED = 'assignedParticipants';
+  const assignedParticipants = listOfBotData.filter((botData) => botData.name === ASSIGNED)[0];
+  if (!assignedParticipants) {
+    bdk.createBotData(roomId, botName, ASSIGNED, serialize({}));
+  }
+}
+
+/**
  * The actions to take before load.
  */
 function init() {
@@ -240,34 +278,8 @@ function init() {
       return bdk.getBotData(roomId, botName);
     })
     .then((data) => {
-      const assignedParticipants = data.body.filter((bd) => bd.name ===
-        'assignedParticipants')[ZERO];
-      if (!assignedParticipants) {
-        bdk.createBotData(roomId, botName,
-          'assignedParticipants', serialize({}))
-          .then(() => console.log(`assigned participant data created - room ${roomId}`));
-      } else {
-        console.log(`participants already exist for room ${roomId}`);
-      }
-
-      const rolesBotData = data.body.filter((bd) => bd.name ===
-        'participantsBotRoles')[ZERO];
-      roles = rolesBotData ?
-        JSON.parse(rolesBotData.value) : rolesFromSettings;
-      if (rolesBotData) {
-        rolesBotDataId = rolesBotData.id;
-      } else {
-        /* eslint-disable no-return-assign */
-        bdk.createBotData(roomId, botName,
-          'participantsBotRoles', serialize(rolesFromSettings))
-          .then((res) => rolesBotDataId = res.body.id);
-      }
-
-      roles.forEach((role) => {
-        currentRole[role.label] = data.body
-          .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
-      });
-
+      assignParticipants(data.body);
+      createBotRoles(data, rolesFromSettings);
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
