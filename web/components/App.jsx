@@ -51,7 +51,7 @@ class App extends React.Component {
     return bdk.getBotData(roomId, botName, constants.BOT_DATA_ASSIGNED_PARTICIPANTS)
       .then((botData) => {
         const botDataParticipants = JSON.parse(botData.body[0].value);
-        botDataParticipants[role] = participant;
+        botDataParticipants[role.toLowerCase()] = participant;
         return botDataParticipants;
       })
       .then((participants) => {
