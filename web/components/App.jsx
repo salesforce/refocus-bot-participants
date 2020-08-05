@@ -88,8 +88,8 @@ class App extends React.Component {
       newValue[role.label] = values;
       this.setState({ value: newValue });
 
-      values = (values ? values : '');
-      const outputValue = (values.label ? values.label : '');
+      values = values || '';
+      const outputValue = values.label || '';
       const eventMessage = (outputValue.length ?
         `Role Assigned: ${role.label} to ${outputValue}` :
         `Role Unassigned: ${role.label}`);
