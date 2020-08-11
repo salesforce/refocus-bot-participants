@@ -17,6 +17,7 @@ const env = require('../../config.js').env;
 const config = require('../../config.js')[env];
 const botName = require('../../package.json').name;
 const bdk = require('@salesforce/refocus-bdk')(config, botName);
+const constants = require('../../service/constants');
 const MIN_HATS = 0;
 const errorTexts = ['Error, please provide a role name',
   'Error, please do not include spaces in role label',
@@ -36,6 +37,27 @@ class App extends React.Component {
     };
     this.handleSelectChange = this.handleSelectChange.bind(this);
     this.toggleRtl = this.toggleRtl.bind(this);
+  }
+
+  /**
+   * Set or update the participants based on the role.
+   *
+   * @param {String} roomId
+   * @param {String} role
+   * @param {Object} participant - new participant to be assigned
+   * @returns {Promise}
+   */
+  assignParticipants(roomId, role, participant) {
+    return bdk.getBotData(roomId, botName, constants.BOT_DATA_ASSIGNED_PARTICIPANTS)
+      .then((botData) => {
+        const botDataParticipants = JSON.parse(botData.body[0].value);
+        botDataParticipants[role.toLowerCase()] = participant;
+        return botDataParticipants;
+      })
+      .then((participants) => {
+        bdk.upsertBotData(roomId, botName, constants.BOT_DATA_ASSIGNED_PARTICIPANTS,
+          serialize(participants));
+      });
   }
 
   /* eslint-disable react/no-deprecated */
@@ -65,47 +87,32 @@ class App extends React.Component {
       const newValue = this.state.value;
       newValue[role.label] = values;
       this.setState({ value: newValue });
+
+      values = values || '';
+      const outputValue = values.label || '';
+      const eventMessage = (outputValue.length ?
+        `Role Assigned: ${role.label} to ${outputValue}` :
+        `Role Unassigned: ${role.label}`);
+
+      const eventType = { 'type': 'Event', 'newUser': values, };
+
       const currentRole = this.state.currentRole;
-      const eventType = {
-        'type': 'Event',
-        'newUser': values,
-      };
-      values = values ? values : '';
-      const outputValue = values.label ? values.label : '';
       if (currentRole[role.label]) {
-        bdk.changeBotData(currentRole[role.label].id,
-          serialize(values))
-          .then((o) => {
-            if (o.ok) {
-              bdk.createEvents(
-                roomId,
-                (outputValue.length ?
-                  `Role Assigned: ${role.label} to ${outputValue}` :
-                  `Role Unassigned: ${role.label}`
-                ),
-                eventType
-              );
-            }
-          });
+        this.assignParticipants(roomId, role.label, values).then(() => {
+          bdk.changeBotData(currentRole[role.label].id,
+            serialize(values))
+            .then((o) => {
+              if (o.ok) bdk.createEvents(roomId, eventMessage, eventType);
+            });
+        });
       } else {
-        bdk.createBotData(
-          this.props.roomId,
-          botName,
-          'participants' + role.label,
-          serialize(values)
-        )
-          .then((o) => {
-            if (o.ok) {
-              bdk.createEvents(
-                roomId,
-                (outputValue.length ?
-                  `Role Assigned: ${role.label} to ${outputValue}` :
-                  `Role Unassigned: ${role.label}`
-                ),
-                eventType
-              );
-            }
-          });
+        this.assignParticipants(roomId, role.label, values).then(() => {
+          bdk.createBotData(this.props.roomId, botName, 'participants' + role.label,
+            serialize(values))
+            .then((o) => {
+              if (o.ok) bdk.createEvents(roomId, eventMessage, eventType);
+            });
+        });
       }
     };
   }

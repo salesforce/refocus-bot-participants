@@ -67,6 +67,7 @@ function renderUI(_users, _roles, _currentRole, _currentUser) {
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-magic-numbers */
 /* eslint-disable no-magic-numbers */
+
 /* eslint-disable prefer-spread */
 /**
  * Creates a role
@@ -125,18 +126,14 @@ function deleteRole(index) {
   const role = roles[index];
   roles.splice(index, 1);
 
-  bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
-    const eventType = {
-      'type': 'Event',
-    };
-
-    bdk.createEvents(
-      roomId,
-      'Role Deleted: ' +
-      `${role.name} (${role.label})`,
-      eventType
-    );
-  });
+  bdk.changeBotData(rolesBotDataId, serialize(roles))
+    .then(() => {
+      const eventType = {
+        'type': 'Event',
+      };
+      bdk.createEvents(roomId,
+        'Role Deleted: ' + `${role.name} (${role.label})`, eventType);
+    });
 }
 
 /**
@@ -169,17 +166,17 @@ function isValidRole(roleName, roleLabel) {
  * @param {Event} event - The most recent event object
  */
 function handleEvents(event) {
-  if (event.detail.roomId === roomId) {
+  const detail = event.detail;
+  if (detail.roomId === roomId) {
     bdk.log.debug('Event received: ', event);
-    if ((event.detail.context) &&
-      (event.detail.context.type === 'User')) {
+    if (detail.context && detail.context.type === 'User') {
       const userChange = {};
-      userChange[event.detail.context.user.id] = {
-        name: event.detail.context.user.name,
-        id: event.detail.context.user.id,
-        email: event.detail.context.user.email,
-        isActive: event.detail.context.isActive,
-        fullName: event.detail.context.user.fullName,
+      userChange[detail.context.user.id] = {
+        name: detail.context.user.name,
+        id: detail.context.user.id,
+        email: detail.context.user.email,
+        isActive: detail.context.isActive,
+        fullName: detail.context.user.fullName,
       };
       renderUI(userChange, roles, currentRole, currentUser);
     }
@@ -189,7 +186,7 @@ function handleEvents(event) {
 /**
  * When a refocus.room.settings is dispatch it is handled here.
  *
- * @param {Room} room - Room object that was dispatched
+ * @param {Object} room - Room object that was dispatched
  */
 function handleSettings(room) {
   bdk.log.debug('Settings Change Event received: ', room);
@@ -198,7 +195,7 @@ function handleSettings(room) {
 /**
  * When a refocus.bot.data is dispatch it is handled here.
  *
- * @param {BotData} data - Bot Data object that was dispatched
+ * @param {Object} data - Bot Data object that was dispatched
  */
 function handleData(data) {
   if (data.detail.roomId === roomId) {
@@ -221,11 +218,49 @@ function handleData(data) {
 /**
  * When a refocus.bot.actions is dispatch it is handled here.
  *
- * @param {BotAction} action - Bot Action object that was dispatched
+ * @param {Object} action - Bot Action object that was dispatched
  */
 function handleActions(action) {
   if (action.detail.roomId === roomId) {
     bdk.log.debug('Action Received: ', action.detail);
+  }
+}
+
+/**
+ * @param {Object} data - request
+ * @param {Object} rolesFromSettings - from RoomType
+ */
+function createBotRoles(data, rolesFromSettings) {
+  const rolesBotData = data.body.filter((bd) => bd.name ===
+    'participantsBotRoles')[ZERO];
+  roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
+  if (rolesBotData) {
+    rolesBotDataId = rolesBotData.id;
+  } else {
+    /* eslint-disable no-return-assign */
+    bdk.createBotData(roomId, botName,
+      'participantsBotRoles', serialize(rolesFromSettings))
+      .then((res) => rolesBotDataId = res.body.id);
+  }
+
+  roles.forEach((role) => {
+    currentRole[role.label] = data.body
+      .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
+  });
+}
+
+/**
+ * Initiate an empty bot data that will contains all the participants in the room
+ * if it's not created yet.
+ *
+ * @param {Array} listOfBotData - all the bot data for the room & participant-bot
+ */
+function assignParticipants(listOfBotData) {
+  if (!listOfBotData) return;
+  const ASSIGNED = 'assignedParticipants';
+  const assignedParticipants = listOfBotData.filter((botData) => botData.name === ASSIGNED)[0];
+  if (!assignedParticipants) {
+    bdk.createBotData(roomId, botName, ASSIGNED, serialize({}));
   }
 }
 
@@ -243,24 +278,8 @@ function init() {
       return bdk.getBotData(roomId, botName);
     })
     .then((data) => {
-      const rolesBotData = data.body.filter((bd) => bd.name ===
-        'participantsBotRoles')[ZERO];
-      roles = rolesBotData ?
-        JSON.parse(rolesBotData.value) : rolesFromSettings;
-      if (rolesBotData) {
-        rolesBotDataId = rolesBotData.id;
-      } else {
-        /* eslint-disable no-return-assign */
-        bdk.createBotData(roomId, botName,
-          'participantsBotRoles', serialize(rolesFromSettings))
-          .then((res) => rolesBotDataId = res.body.id);
-      }
-
-      roles.forEach((role) => {
-        currentRole[role.label] = data.body
-          .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
-      });
-
+      assignParticipants(data.body);
+      createBotRoles(data, rolesFromSettings);
       return bdk.getActiveUsers(roomId);
     })
     .then((users) => {
