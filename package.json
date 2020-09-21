@@ -1,9 +1,12 @@
 {
   "name": "Participants-Bot",
   "displayName": "Participants",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "This is a refocus room bot that will show all the users in the current room and assign different hats",
   "url": "https://github.com/salesforce/refocus-bot-participants/",
+  "engines": {
+    "node": "14.x"
+  },
   "scripts": {
     "start-ui": "webpack-dev-server --open",
     "start": "npm run build-ui && node index.js",
