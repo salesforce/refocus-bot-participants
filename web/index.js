@@ -233,7 +233,6 @@ function handleActions(action) {
 function createBotRoles(data, rolesFromSettings) {
   const rolesBotData = data.body.filter((bd) => bd.name ===
     'participantsBotRoles')[ZERO];
-  roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
   if (rolesBotData) {
     rolesBotDataId = rolesBotData.id;
   } else {
@@ -242,11 +241,6 @@ function createBotRoles(data, rolesFromSettings) {
       'participantsBotRoles', serialize(rolesFromSettings))
       .then((res) => rolesBotDataId = res.body.id);
   }
-
-  roles.forEach((role) => {
-    currentRole[role.label] = data.body
-      .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
-  });
 }
 
 /**
