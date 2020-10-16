@@ -106,12 +106,8 @@ class App extends React.Component {
             });
         });
       } else {
-        this.assignParticipants(roomId, role.label, values).then(() => {
-          bdk.createBotData(this.props.roomId, botName, 'participants' + role.label,
-            serialize(values))
-            .then((o) => {
-              if (o.ok) bdk.createEvents(roomId, eventMessage, eventType);
-            });
+        this.assignParticipants(roomId, role.label, values).then((o) => {
+          if (o.ok) bdk.createEvents(roomId, eventMessage, eventType);
         });
       }
     };
