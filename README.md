@@ -84,4 +84,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.1.17 Updated bdk to avail of new getActiveUsers code change.
 * 1.2.0  New bot data aggregating all the participant roles.
 * 1.2.1 Specify node version
-
+* 1.2.2 Removing single Participant BotData
