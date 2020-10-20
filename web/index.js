@@ -241,6 +241,11 @@ function createBotRoles(data, rolesFromSettings) {
       'participantsBotRoles', serialize(rolesFromSettings))
       .then((res) => rolesBotDataId = res.body.id);
   }
+  roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
+  roles.forEach((role) => {
+    currentRole[role.label] = data.body
+      .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
+  });
 }
 
 /**
