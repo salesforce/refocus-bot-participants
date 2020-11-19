@@ -7,44 +7,44 @@
  */
 
 const path = require('path');
+// creates index.html folder and puts it in dist folder
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const dotenv = require('dotenv-webpack');
 const ZipPlugin = require('zip-webpack-plugin');
-const Dotenv = require('dotenv-webpack');
 const env = require('./config.js').env;
 const url = require('./config.js')[env].refocusUrl;
 const botName = require('./package.json').name;
-const Uglify = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const config = {
-
   entry: './web/index.js',
-
   output: {
     path: path.resolve(__dirname, './web/dist'),
     filename: 'index_bundle.js',
     publicPath: '/'
   },
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({})],
+  },
+
 
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        include: [path.resolve(__dirname, 'lib'),
-          path.resolve(__dirname, 'web')],
-        use: 'babel-loader?compact=true',
+        exclude: [/(node_modules|bower_components)/, path.resolve(__dirname, 'web/dist')],
+        include: [path.resolve(__dirname, 'lib'), path.resolve(__dirname, 'web')],
+        loader: 'babel-loader'
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader'],
-      },
-      {
-        test: /\.handlebars$/,
-        loader: 'handlebars-loader',
-        include: path.resolve(__dirname, 'web'),
+        loader: ['style-loader', 'css-loader']
       },
       {
         test: /.(png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$/,
-        use: 'url-loader?limit=100000',
+        loader: 'url-loader?limit=100000',
+        include: path.resolve(__dirname, 'web'),
       },
     ]
   },
@@ -68,18 +68,16 @@ const config = {
       include: [/\.js$/, /\.html$/],
       exclude: ['public']
     }),
-    new Dotenv({
+    new dotenv({
       path: './.env',
       safe: false,
       systemvars: true
     }),
-  ]
+  ],
 };
 
-if (env === 'production') {
-  config.plugins.push(
-    new Uglify()
-  );
+// eslint-disable-next-line no-process-env
+if (process.env.NODE_ENV !== 'production') {
+  config.optimization.minimize = false;
 }
-
 module.exports = config;
