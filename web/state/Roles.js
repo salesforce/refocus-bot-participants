@@ -31,7 +31,7 @@ class Roles {
     try {
       await this.bdk.upsertBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME, rolesData);
     } catch (e) {
-      console.log('Failed to create roles botData', e);
+      console.error('Failed to create roles botData', e);
       return {};
     }
     return rolesData;
