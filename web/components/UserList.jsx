@@ -7,7 +7,6 @@
  */
 
 import PropTypes from 'prop-types';
-import 'react-select/dist/react-select.css';
 const React = require('react');
 
 /**

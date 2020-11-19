@@ -1,5 +1,4 @@
 import React from 'react';
-import 'react-select/dist/react-select.css';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
 import Roles from '../state/Roles';
@@ -48,8 +47,9 @@ function RoleSelector({ roleLabel, role, options }) {
         <div>{role.name}</div>
       </div>
 
-      <Select.Creatable
+      <Select
         onChange={(user) => assignRole(roleLabel, user)}
+        isClearable={true}
         options={options}
         placeholder={'Choose ' + roleLabel}
         value={role.user}
