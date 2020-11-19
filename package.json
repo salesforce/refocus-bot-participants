@@ -13,7 +13,7 @@
     "build-ui": "webpack --config webpack.config.js",
     "lint": "eslint --ext=js --ext=jsx .",
     "postinstall": "npm run build-ui",
-    "coverage": "istanbul cover node_modules/mocha/bin/_mocha tests/*",
+    "coverage": "nyc node_modules/mocha/bin/_mocha --recursive tests/* --require @babel/register",
     "test": "npm run lint && mocha --recursive tests/* --require @babel/register && npm run coverage ",
     "test-dev": "nodemon --require @babel/register --ext js --recursive --watch ./ --exec 'mocha ./tests'"
   },
@@ -77,6 +77,7 @@
     "eslint-plugin-react": "^7.17.0",
     "html-webpack-plugin": "^4.5.0",
     "nodemon": "^2.0.6",
+    "nyc": "^15.1.0",
     "style-loader": "^0.18.2",
     "terser-webpack-plugin": "^3.0.1",
     "uglifyjs-webpack-plugin": "^1.2.7",
