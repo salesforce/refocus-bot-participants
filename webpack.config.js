@@ -33,8 +33,8 @@ const config = {
     rules: [
       {
         test: /\.(js|jsx)$/,
-        exclude: [/(node_modules|bower_components)/, path.resolve(__dirname, 'web/dist')],
-        include: [path.resolve(__dirname, 'lib'), path.resolve(__dirname, 'web')],
+        exclude: [/(node_modules)/, path.resolve(__dirname, 'web/dist')],
+        include: [path.resolve(__dirname, 'web')],
         loader: 'babel-loader'
       },
       {
