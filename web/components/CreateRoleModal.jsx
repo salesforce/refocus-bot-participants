@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import Roles from '../state/Roles';
+import RoleManager from '../state/RoleManager';
 const env = require('../../config.js').env;
 const config = require('../../config.js')[env];
 const botName = require('../../package.json').name;
 const bdk = require('@salesforce/refocus-bdk')(config, botName);
-const roleManager = new Roles(bdk, botName);
+const roleManager = new RoleManager(bdk, botName);
 
 const FALSE = 0;
 const errorTexts = ['Error, please provide a role name',

@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import * as mockdata from './mocks/roleData';
-import Roles from '../../../web/state/Roles';
+import RoleManager from '../../../web/state/RoleManager';
 
 const ZERO = 0;
 const ERR_NO_ROLE_NAME = 1;
@@ -21,7 +21,7 @@ describe('Roles.js >', () => {
         getRoomId: () => roomId,
         upsertBotData: upsertBotDataFake,
       };
-      const testRoles = new Roles(bdk, botName);
+      const testRoles = new RoleManager(bdk, botName);
       await testRoles.createRolesBotData();
       expect(findRoomFake.called).to.equal(true);
       expect(findRoomFake.calledWith(roomId)).to.equal(true);
@@ -37,7 +37,7 @@ describe('Roles.js >', () => {
         getRoomId: () => roomId,
         upsertBotData: upsertBotDataFake,
       };
-      const testRoles = new Roles(bdk, botName);
+      const testRoles = new RoleManager(bdk, botName);
       await testRoles.createRolesBotData();
       expect(upsertBotDataFake.args[0]).to.deep.equal([roomId, botName, 'assignedParticipants', {}]);
     });
@@ -50,7 +50,7 @@ describe('Roles.js >', () => {
         getRoomId: () => roomId,
         upsertBotData: upsertBotDataFake,
       };
-      const testRoles = new Roles(bdk, botName);
+      const testRoles = new RoleManager(bdk, botName);
       const result = await testRoles.createRolesBotData();
       const expected = {};
       expect(result).to.deep.equal(expected);
@@ -69,7 +69,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake
       };
 
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.getRoles();
       expect(getBotDataFake.args[0]).to.deep.equal([roomId, botName, 'assignedParticipants']);
       expect(result).to.deep.equal(mockdata.expectedParticipantsObjectFromRoomType);
@@ -82,7 +82,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake
       };
 
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.getRoles();
       const expected = undefined;
       expect(result).to.deep.equal(expected);
@@ -94,7 +94,7 @@ describe('Roles.js >', () => {
         getRoomId: () => roomId,
         getBotData: getBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.getRoles();
       const expected = undefined;
       expect(result).to.deep.equal(expected);
@@ -114,7 +114,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         changeBotData: changeBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.deleteRole(mockdata.testParticipantOneLabel);
       expect(expected).to.equal(true);
       expect(changeBotDataFake.args[0]).to.deep.equal([mockdata.testBotDataId, mockdata.expectedParticipantsObjectWithParticipantRemoved]);
@@ -128,7 +128,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         changeBotData: changeBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.deleteRole('notARoleLabel');
       expect(expected).to.equal(false);
       expect(changeBotDataFake.called).to.equal(false);
@@ -142,7 +142,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         changeBotData: changeBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.deleteRole(mockdata.testParticipantOneLabel);
       expect(getBotDataFake.callCount).to.equal(2);
       expect(expected).to.equal(false);
@@ -163,7 +163,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.createRole('Quarterback', 'QB');
       expect(upsertBotDataFake.args[0])
         .to.deep.equal([roomId, botName, 'assignedParticipants', mockdata.expectedParticipantsObjectWithParticipantAdded]);
@@ -178,7 +178,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.createRole('Quarterback', 'QB');
       expect(expected).to.equal(ZERO);
       expect(upsertBotDataFake.called).to.equal(false);
@@ -192,7 +192,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.createRole('', 'QB');
       expect(expected).to.equal(ERR_NO_ROLE_NAME);
       expect(upsertBotDataFake.called).to.equal(false);
@@ -206,7 +206,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.createRole('Quarterback', 'Q B');
       expect(expected).to.equal(ERR_SPACE_IN_ROLE_LABEL);
       expect(upsertBotDataFake.called).to.equal(false);
@@ -220,7 +220,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const expected = await roles.createRole('Incident Commander', 'IC');
       expect(expected).to.equal(ERR_ROLE_ALREADY_EXISTS);
       expect(upsertBotDataFake.called).to.equal(false);
@@ -240,7 +240,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.assignUserToRole(mockdata.testParticipantOneLabel, mockdata.testUserObject);
       expect(result).to.equal(true);
       expect(upsertBotDataFake.args[0][3].ic.user).to.deep.equal(mockdata.testUserObject);
@@ -254,7 +254,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.assignUserToRole(mockdata.testParticipantOneLabel, null);
       expect(result).to.equal(true);
       expect(upsertBotDataFake.args[0][3].ic.user).to.equal(undefined);
@@ -268,7 +268,7 @@ describe('Roles.js >', () => {
         getBotData: getBotDataFake,
         upsertBotData: upsertBotDataFake
       };
-      const roles = new Roles(bdk, botName);
+      const roles = new RoleManager(bdk, botName);
       const result = await roles.assignUserToRole(mockdata.testParticipantOneLabel, mockdata.testUserObject);
       expect(result).to.equal(false);
       expect(upsertBotDataFake.called).to.equal(false);

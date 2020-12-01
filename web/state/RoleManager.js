@@ -3,13 +3,13 @@ const ZERO = 0;
 const ERR_NO_ROLE_NAME = 1;
 const ERR_SPACE_IN_ROLE_LABEL = 2;
 const ERR_ROLE_ALREADY_EXISTS = 3;
+const BOT_DATA_NAME = 'assignedParticipants';
 
-class Roles {
+class RoleManager {
   constructor (bdk, botName) {
     this.roomId = bdk.getRoomId();
     this.botName = botName;
     this.bdk = bdk;
-    this.ROLES_BOTDATA_NAME = 'assignedParticipants';
   }
 
   /**
@@ -29,7 +29,7 @@ class Roles {
     });
 
     try {
-      await this.bdk.upsertBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME, rolesData);
+      await this.bdk.upsertBotData(this.roomId, this.botName, BOT_DATA_NAME, rolesData);
     } catch (e) {
       console.error('Failed to create roles botData', e);
       return {};
@@ -43,7 +43,7 @@ class Roles {
    */
   async getRoles() {
     try {
-      const rolesBotData = await this.bdk.getBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME);
+      const rolesBotData = await this.bdk.getBotData(this.roomId, this.botName, BOT_DATA_NAME);
       const parsed = JSON.parse(rolesBotData.body[0].value);
       return parsed;
     } catch (e) {
@@ -65,7 +65,7 @@ class Roles {
     }
     delete currentRoleData[label.toLowerCase()];
     try {
-      const botData = await this.bdk.getBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME);
+      const botData = await this.bdk.getBotData(this.roomId, this.botName, BOT_DATA_NAME);
       await this.bdk.changeBotData(botData.body[0].id, currentRoleData);
       return true;
     } catch (e) {
@@ -87,7 +87,7 @@ class Roles {
     if (isValid === ZERO) {
       currentRoles[label.toLowerCase()] = { name, label };
       try {
-        await this.bdk.upsertBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME, currentRoles);
+        await this.bdk.upsertBotData(this.roomId, this.botName, BOT_DATA_NAME, currentRoles);
       } catch (e) {
         console.error(e);
       }
@@ -116,7 +116,7 @@ class Roles {
     }
 
     try {
-      await this.bdk.upsertBotData(this.roomId, this.botName, this.ROLES_BOTDATA_NAME, currentRoleData);
+      await this.bdk.upsertBotData(this.roomId, this.botName, BOT_DATA_NAME, currentRoleData);
       return true;
     } catch (e) {
       console.error(e);
@@ -151,4 +151,4 @@ class Roles {
 }
 
 
-export default Roles;
+export default RoleManager;

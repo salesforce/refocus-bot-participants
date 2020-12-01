@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-select/dist/react-select.css';
 import Select from 'react-select';
 import PropTypes from 'prop-types';
-import Roles from '../state/Roles';
+import Roles from '../state/RoleManager';
 
 const env = require('../../config.js').env;
 const config = require('../../config.js')[env];

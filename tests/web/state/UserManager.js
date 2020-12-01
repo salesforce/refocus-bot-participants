@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import * as mockdata from './mocks/userData';
-import Users from '../../../web/state/Users';
+import Users from '../../../web/state/UserManager';
 
 describe('Users.js >', () => {
   describe('getUsers function >', () => {

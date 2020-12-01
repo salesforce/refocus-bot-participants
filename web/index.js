@@ -14,16 +14,16 @@
  */
 
 import App from './components/App.jsx';
-import Roles from './state/Roles';
-import Users from './state/Users';
+import RoleManager from './state/RoleManager';
+import UserManager from './state/UserManager';
 const React = require('react');
 const ReactDOM = require('react-dom');
 const env = require('../config.js').env;
 const config = require('../config.js')[env];
 const botName = require('../package.json').name;
 const bdk = require('@salesforce/refocus-bdk')(config, botName);
-const roleManager = new Roles(bdk, botName);
-const userManager = new Users(bdk, botName);
+const roleManager = new RoleManager(bdk, botName);
+const userManager = new UserManager(bdk, botName);
 const roomId = bdk.getRoomId();
 
 let roles = {};
@@ -53,16 +53,6 @@ function handleEvents(event) {
   const detail = event.detail;
   if (detail.roomId === roomId) {
     bdk.log.debug('Event received: ', event);
-    if (detail.context && detail.context.type === 'User') {
-      const user = {
-        name: detail.context.user.name,
-        id: detail.context.user.id,
-        email: detail.context.user.email,
-        isActive: detail.context.isActive,
-        fullName: detail.context.user.fullName,
-      };
-      userManager.addUser(user);
-    }
   }
 }
 
@@ -119,6 +109,14 @@ async function init() {
   if (storedRoles === undefined) {
     storedRoles = await roleManager.createRolesBotData();
   }
+  const user = {
+    name: bdk.getUserName(),
+    id: bdk.getUserId(),
+    email: bdk.getUserEmail(),
+    isActive: true,
+    fullName: bdk.getUserFullName(),
+  };
+  userManager.addUser(user);
   roles = storedRoles;
   users = storedUsers;
   renderUI();

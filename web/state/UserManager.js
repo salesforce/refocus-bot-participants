@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-class Users {
+class UserManager {
   constructor(bdk, botName) {
     this.roomId = bdk.getRoomId();
     this.botName = botName;
@@ -14,6 +14,7 @@ class Users {
   async getUsers() {
     try {
       const usersBotData = await this.bdk.getBotData(this.roomId, this.botName, this.USERS_BOTDATA_NAME);
+      console.log(usersBotData);
       const parsed = JSON.parse(usersBotData.body[0].value);
       return parsed;
     } catch (e) {
@@ -28,10 +29,11 @@ class Users {
    * @returns {boolean} - whether or not the user has been added to the list.
    */
   async addUser(user) {
+    console.log('add user');
     const userData = await this.getUsers();
 
     if (userData === undefined) {
-      this.bdk.upsertBotData(this.roomId, this.botName, this.USERS_BOTDATA_NAME, [user]);
+      await this.bdk.upsertBotData(this.roomId, this.botName, this.USERS_BOTDATA_NAME, [user]);
       return true;
     }
 
@@ -45,4 +47,4 @@ class Users {
 }
 
 
-export default Users;
+export default UserManager;
