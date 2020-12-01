@@ -85,3 +85,4 @@ Follows [semantic versioning](https://docs.npmjs.com/getting-started/semantic-ve
 * 1.2.0  New bot data aggregating all the participant roles.
 * 1.2.1 Specify node version
 * 1.2.2 Removing single Participant BotData
+* 2.0.0 Large refactor of state, totally converted to new participant botData
