@@ -13,151 +13,35 @@
  * from javascript events.
  */
 
+import App from './components/App.jsx';
+import RoleManager from './state/RoleManager';
+import UserManager from './state/UserManager';
 const React = require('react');
 const ReactDOM = require('react-dom');
-const App = require('./components/App.jsx');
 const env = require('../config.js').env;
 const config = require('../config.js')[env];
 const botName = require('../package.json').name;
 const bdk = require('@salesforce/refocus-bdk')(config, botName);
-const serialize = require('serialize-javascript');
+const roleManager = new RoleManager(bdk, botName);
+const userManager = new UserManager(bdk, botName);
 const roomId = bdk.getRoomId();
-const ZERO = 0;
-const ERR_NO_ROLE_NAME = 1;
-const ERR_SPACE_IN_ROLE_LABEL = 2;
-const ERR_ROLE_ALREADY_EXISTS = 3;
-const currentUser = {
-  name: bdk.getUserName(),
-  id: bdk.getUserId(),
-  email: bdk.getUserEmail(),
-  fullName: bdk.getUserFullName(),
-};
 
-let roles = [];
-const currentRole = {};
-let rolesBotDataId;
-let showingError = 0;
+let roles = {};
+let users = [];
 
-/* eslint-disable no-use-before-define */
 /**
  * This is the main function to render the UI
- *
- * {Integer} roomId - Room Id that is provided from refocus
- * @param {Object} _users - All users
- * @param {Array} _roles - All the roles
  * @param {Object} _currentRole - The current role of user
  * @param {Object} _currentUser - The current user on page
  */
-function renderUI(_users, _roles, _currentRole, _currentUser) {
+async function renderUI() {
   ReactDOM.render(
     <App
-      roomId={roomId}
-      users={_users}
-      roles={_roles}
-      showingError={showingError}
-      currentRole={_currentRole}
-      currentUser={_currentUser}
-      createRole={createRole}
-      deleteRole={deleteRole}
+      users={users}
+      roles={roles}
     />,
     document.getElementById(botName)
   );
-}
-
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-magic-numbers */
-/* eslint-disable no-magic-numbers */
-
-/* eslint-disable prefer-spread */
-/**
- * Creates a role
- * @returns {Promise<any>}
- */
-function createRole() {
-  const roleName = document.getElementById('roleName');
-  const roleLabel = document.getElementById('roleLabel');
-
-  const nameString = roleName.value;
-  const labelString = roleLabel.value === '' ?
-    nameString.replace(/ /g, '') : roleLabel.value;
-
-  return new Promise((resolve) => {
-    const validRole = isValidRole(nameString, labelString);
-    if (validRole === 0) {
-      const highestOrder = Math.max.apply(Math, roles.map((o) => {
-        return o.order;
-      }));
-      roles.push({
-        name: nameString, label: labelString,
-        order: highestOrder + 1
-      });
-      bdk.changeBotData(rolesBotDataId, serialize(roles)).then(() => {
-        const eventType = {
-          'type': 'Event',
-        };
-
-        bdk.createEvents(
-          roomId,
-          'New Role Created: ' +
-          `${nameString} (${labelString})`,
-          eventType
-        );
-
-        roleName.value = '';
-        roleLabel.value = '';
-        showingError = validRole;
-        resolve(false);
-        renderUI(null, roles, currentRole, currentUser);
-      });
-    } else {
-      showingError = validRole;
-      resolve(true);
-      renderUI(null, roles, currentRole, currentUser);
-    }
-  });
-}
-
-/**
- * Delete role
- *
- * @param {number} index - role to be removed
- */
-function deleteRole(index) {
-  const role = roles[index];
-  roles.splice(index, 1);
-
-  bdk.changeBotData(rolesBotDataId, serialize(roles))
-    .then(() => {
-      const eventType = {
-        'type': 'Event',
-      };
-      bdk.createEvents(roomId,
-        'Role Deleted: ' + `${role.name} (${role.label})`, eventType);
-    });
-}
-
-/**
- * Check if role name and label are valid.
- *
- * @param {String} roleName
- * @param {String} roleLabel
- * @returns {number}
- */
-function isValidRole(roleName, roleLabel) {
-  if (!roleName.length) {
-    return ERR_NO_ROLE_NAME;
-  } else if (/\s/.test(roleLabel)) {
-    return ERR_SPACE_IN_ROLE_LABEL;
-  }
-
-  let valid = ZERO;
-  roles.forEach((role) => {
-    if (role.name === roleName || role.label === roleLabel) {
-      valid = ERR_ROLE_ALREADY_EXISTS;
-    }
-  });
-
-  return valid;
 }
 
 /**
@@ -169,17 +53,6 @@ function handleEvents(event) {
   const detail = event.detail;
   if (detail.roomId === roomId) {
     bdk.log.debug('Event received: ', event);
-    if (detail.context && detail.context.type === 'User') {
-      const userChange = {};
-      userChange[detail.context.user.id] = {
-        name: detail.context.user.name,
-        id: detail.context.user.id,
-        email: detail.context.user.email,
-        isActive: detail.context.isActive,
-        fullName: detail.context.user.fullName,
-      };
-      renderUI(userChange, roles, currentRole, currentUser);
-    }
   }
 }
 
@@ -200,18 +73,19 @@ function handleSettings(room) {
 function handleData(data) {
   if (data.detail.roomId === roomId) {
     bdk.log.debug('Bot Data Event Received: ', data.detail);
-    if (data.detail.name === 'participantsBotRoles') {
-      roles = JSON.parse(data.detail.value);
-    } else {
-      const label = data.detail.name.replace('participants', '');
-      if (!currentRole[label]) {
-        currentRole[label] = {};
-        currentRole[label].id = data.detail.id;
+    switch (data.detail.name) {
+      case 'assignedParticipants': {
+        roles = JSON.parse(data.detail.value);
+        break;
       }
-      currentRole[label].value = data.detail.value;
+      case 'listOfRoomUsers': {
+        users = JSON.parse(data.detail.value);
+        break;
+      }
+      default: break;
     }
 
-    renderUI(null, roles, currentRole, currentUser);
+    renderUI();
   }
 }
 
@@ -227,63 +101,25 @@ function handleActions(action) {
 }
 
 /**
- * @param {Object} data - request
- * @param {Object} rolesFromSettings - from RoomType
+ * Initialize roles and users lists, then render the React UI
  */
-function createBotRoles(data, rolesFromSettings) {
-  const rolesBotData = data.body.filter((bd) => bd.name ===
-    'participantsBotRoles')[ZERO];
-  if (rolesBotData) {
-    rolesBotDataId = rolesBotData.id;
-  } else {
-    /* eslint-disable no-return-assign */
-    bdk.createBotData(roomId, botName,
-      'participantsBotRoles', serialize(rolesFromSettings))
-      .then((res) => rolesBotDataId = res.body.id);
+async function init() {
+  let storedRoles = await roleManager.getRoles();
+  const storedUsers = await userManager.getUsers() || [];
+  if (storedRoles === undefined) {
+    storedRoles = await roleManager.createRolesBotData();
   }
-  roles = rolesBotData ? JSON.parse(rolesBotData.value) : rolesFromSettings;
-  roles.forEach((role) => {
-    currentRole[role.label] = data.body
-      .filter((bd) => bd.name === 'participants' + role.label)[ZERO];
-  });
-}
-
-/**
- * Initiate an empty bot data that will contains all the participants in the room
- * if it's not created yet.
- *
- * @param {Array} listOfBotData - all the bot data for the room & participant-bot
- */
-function assignParticipants(listOfBotData) {
-  if (!listOfBotData) return;
-  const ASSIGNED = 'assignedParticipants';
-  const assignedParticipants = listOfBotData.filter((botData) => botData.name === ASSIGNED)[0];
-  if (!assignedParticipants) {
-    bdk.createBotData(roomId, botName, ASSIGNED, serialize({}));
-  }
-}
-
-/**
- * The actions to take before load.
- */
-function init() {
-  let rolesFromSettings = [];
-
-  bdk.findRoom(roomId)
-    .then((res) => {
-      rolesFromSettings = (res.body.settings &&
-        (res.body.settings.participantsRoles !== undefined)) ?
-        res.body.settings.participantsRoles : [];
-      return bdk.getBotData(roomId, botName);
-    })
-    .then((data) => {
-      assignParticipants(data.body);
-      createBotRoles(data, rolesFromSettings);
-      return bdk.getActiveUsers(roomId);
-    })
-    .then((users) => {
-      renderUI(users, roles, currentRole, currentUser);
-    });
+  const user = {
+    name: bdk.getUserName(),
+    id: bdk.getUserId(),
+    email: bdk.getUserEmail(),
+    isActive: true,
+    fullName: bdk.getUserFullName(),
+  };
+  userManager.addUser(user);
+  roles = storedRoles;
+  users = storedUsers;
+  renderUI();
 }
 
 document.getElementById(botName)
