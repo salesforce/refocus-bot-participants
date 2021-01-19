@@ -16,6 +16,7 @@
 const DEFAULT_PORT = 5000;
 
 module.exports = {
+  SYNC_BOT_ID: process.env.SYNC_BOT_ID,
   env: process.env.NODE_ENV || 'dev',
   port: process.env.PORT || DEFAULT_PORT,
   dev: {
