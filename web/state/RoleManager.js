@@ -96,6 +96,17 @@ class RoleManager {
     return isValid;
   }
 
+  syncRoles(roomId){
+    const syncAction = {
+      'name': 'getNames',
+      'botId': SYNC_BOT_ID,
+      roomId,
+      'isPending': true,
+      'parameters': []
+    };
+    this.bdk.createBotAction(syncAction);
+  }
+
   /**
    *
    * @param {string} roleLabel - label of role to assign user to.
@@ -117,15 +128,7 @@ class RoleManager {
     }
 
     if (SYNC_BOT_ID){
-      const roomId = this.roomId;
-      const syncAction = {
-        'name': 'getNames',
-        'botId': SYNC_BOT_ID,
-        roomId,
-        'isPending': true,
-        'parameters': []
-      };
-      this.bdk.createBotAction(syncAction);
+      this.syncRoles(this.roomId);
     }
 
     try {
