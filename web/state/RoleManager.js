@@ -4,6 +4,7 @@ const ERR_NO_ROLE_NAME = 1;
 const ERR_SPACE_IN_ROLE_LABEL = 2;
 const ERR_ROLE_ALREADY_EXISTS = 3;
 const BOT_DATA_NAME = 'assignedParticipants';
+const SYNC_BOT_ID = require('../config.js').SYNC_BOT_ID;
 
 class RoleManager {
   constructor (bdk, botName) {
@@ -95,6 +96,17 @@ class RoleManager {
     return isValid;
   }
 
+  syncRoles(roomId){
+    const syncAction = {
+      'name': 'getNames',
+      'botId': SYNC_BOT_ID,
+      roomId,
+      'isPending': true,
+      'parameters': []
+    };
+    this.bdk.createBotAction(syncAction);
+  }
+
   /**
    *
    * @param {string} roleLabel - label of role to assign user to.
@@ -113,6 +125,10 @@ class RoleManager {
       delete currentRoleData[roleLabel.toLowerCase()].user;
     } else {
       currentRoleData[roleLabel.toLowerCase()].user = user;
+    }
+
+    if (SYNC_BOT_ID){
+      this.syncRoles(this.roomId);
     }
 
     try {

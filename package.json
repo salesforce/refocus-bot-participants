@@ -1,7 +1,7 @@
 {
   "name": "Participants-Bot",
   "displayName": "Participants",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "This is a refocus room bot that will show all the users in the current room and assign different hats",
   "url": "https://github.com/salesforce/refocus-bot-participants/",
   "engines": {
