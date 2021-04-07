@@ -4,7 +4,7 @@ const ERR_NO_ROLE_NAME = 1;
 const ERR_SPACE_IN_ROLE_LABEL = 2;
 const ERR_ROLE_ALREADY_EXISTS = 3;
 const BOT_DATA_NAME = 'assignedParticipants';
-const SYNC_BOT_ID = require('../config.js').SYNC_BOT_ID;
+const SYNC_BOT_ID = require('../../config.js').SYNC_BOT_ID;
 
 class RoleManager {
   constructor (bdk, botName) {
