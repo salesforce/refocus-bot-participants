@@ -98,7 +98,7 @@ class RoleManager {
 
   syncRoles(roomId){
     const syncAction = {
-      'name': 'getNames',
+      'name': 'syncRoles',
       'botId': SYNC_BOT_ID,
       roomId,
       'isPending': true,
